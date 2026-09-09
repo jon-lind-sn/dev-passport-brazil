@@ -1,0 +1,14 @@
+{
+  "enabledPlugins": {
+    "servicenow-sdk@claude-plugins-official": true
+  },  
+  "permissions": {
+    "allow": [
+      "Bash(git fetch *)",
+      "Bash(git switch *)",
+      "Bash(git checkout *)",
+      "Bash(npx @servicenow/sdk explain *)",
+      "Bash(npx --yes @servicenow/sdk transform --help)"
+    ]
+  }
+}
