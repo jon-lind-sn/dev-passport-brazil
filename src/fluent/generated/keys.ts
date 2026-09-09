@@ -18,6 +18,18 @@ declare global {
                         table: 'sys_atf_test_suite'
                         id: 'd8bac3457a914d568c7d013a582c6597'
                     }
+                    hello_world_mandatory_fields_policy: {
+                        table: 'sys_data_policy2'
+                        id: '8c139a1ee53d4f5097d693658d86b68d'
+                    }
+                    hello_world_mandatory_fields_policy_task_rule: {
+                        table: 'sys_data_policy_rule'
+                        id: 'af3a117ba2d247ec8a66e5aa77be3a65'
+                    }
+                    hello_world_mandatory_fields_policy_title_rule: {
+                        table: 'sys_data_policy_rule'
+                        id: '1f955aab4f954c928f7bb3aa59a8742d'
+                    }
                     hello_world_menu: {
                         table: 'sys_app_application'
                         id: '7b41593f40874248933afb5d59f78609'
