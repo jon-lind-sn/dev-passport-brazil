@@ -5,7 +5,7 @@ export const helloWorldRequiresTitleAndTask = Test(
     {
         $id: Now.ID['hello_world_requires_title_and_task'],
         name: 'Hello World requires Title and Task',
-        description: 'Verifies a Hello World record cannot be created without both a Title and a Task reference',
+        description: 'Attempts to insert a Hello World record with Title and/or Task left blank and asserts each insert is rejected -- Title and Task are intended to be mandatory, so a record missing either should fail to insert',
         active: true,
         // This instance logs "Unable to find vtable operation for operation
         // id {}" as an error-level message on every GlideRecord insert (a
