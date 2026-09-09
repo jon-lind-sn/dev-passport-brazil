@@ -364,12 +364,29 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_documentation'
+                        id: 'df8c2297dab54ffbb16a36e587317b9d'
+                        key: {
+                            name: 'x_snc_dev_pass_b_hello_world'
+                            element: 'notes'
+                            language: 'en'
+                        }
+                    },
+                    {
                         table: 'sys_variable_value'
                         id: 'e38112e4209e4d98a1915449d3d48892'
                         deleted: false
                         key: {
                             document_key: '3ba5bd4541e54429b6126423dfb1f90f'
                             variable: '90144b535320220002c6435723dc3488'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: 'ecfef43943b34b4fa18859a01536edc1'
+                        key: {
+                            name: 'x_snc_dev_pass_b_hello_world'
+                            element: 'notes'
                         }
                     },
                     {
