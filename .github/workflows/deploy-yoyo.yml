@@ -1,4 +1,4 @@
-name: Deploy to yoyo (test)
+name: Build, test, and promote to prod
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  deploy:
+  build-and-install-test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -23,7 +23,7 @@ jobs:
       - name: Verify keys.ts is up to date
         run: npx @servicenow/sdk build --frozenKeys
 
-      - name: Install on yoyo
+      - name: Install on yoyo (test instance)
         env:
           SN_SDK_NODE_ENV: SN_SDK_CI_INSTALL
           SN_SDK_AUTH_TYPE: basic
@@ -31,3 +31,102 @@ jobs:
           SN_SDK_USER: jon.lind
           SN_SDK_USER_PWD: ${{ secrets.SN_SDK_USER_PWD }}
         run: npx @servicenow/sdk install
+
+  atf-test:
+    needs: build-and-install-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Authenticate to yoyo (test instance)
+        run: |
+          echo "${{ secrets.SN_SDK_USER_PWD }}" | npx @servicenow/sdk auth \
+            --add https://yoyo.service-now.com \
+            --type basic \
+            --alias test \
+            --username jon.lind \
+            --password-stdin
+
+      - name: Run ATF regression suite on yoyo
+        run: |
+          npx @servicenow/sdk cicd testsuite run \
+            --test-suite-name "Dev Passport Brazil Regression Suite" \
+            --auth test \
+            -o json
+
+  publish:
+    needs: atf-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Authenticate to yoyo (test instance)
+        run: |
+          echo "${{ secrets.SN_SDK_USER_PWD }}" | npx @servicenow/sdk auth \
+            --add https://yoyo.service-now.com \
+            --type basic \
+            --alias test \
+            --username jon.lind \
+            --password-stdin
+
+      - name: Publish to Application Repository
+        run: |
+          npx @servicenow/sdk cicd publish \
+            --auth test \
+            -o json
+
+  approve-prod:
+    needs: publish
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Manual approval gate
+        run: echo "Approved for production install"
+
+  install-prod:
+    needs: approve-prod
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Authenticate to zorb (prod instance)
+        run: |
+          echo "${{ secrets.SN_SDK_PROD_USER_PWD }}" | npx @servicenow/sdk auth \
+            --add https://zorb.service-now.com \
+            --type basic \
+            --alias prod \
+            --username jon.lind \
+            --password-stdin
+
+      - name: Install published app on zorb
+        run: |
+          npx @servicenow/sdk cicd install \
+            --auth prod \
+            -o json
