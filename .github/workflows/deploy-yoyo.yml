@@ -58,10 +58,36 @@ jobs:
 
       - name: Run ATF regression suite on yoyo
         run: |
-          npx @servicenow/sdk cicd testsuite run \
+          set +e
+          RESULT=$(npx @servicenow/sdk cicd testsuite run \
             --test-suite-name "Dev Passport Brazil Regression Suite" \
             --auth test \
-            -o json
+            -o json)
+          EXIT_CODE=$?
+          echo "$RESULT"
+
+          MESSAGE=$(echo "$RESULT" | jq -r '.error.message // .result.message // empty' 2>/dev/null)
+          DETAILS_URL=$(echo "$MESSAGE" | grep -oE 'https://[^[:space:]]+' | head -1)
+
+          {
+            echo "## ATF Regression Suite Result"
+            echo
+            if [ -n "$MESSAGE" ]; then
+              echo '```'
+              echo "$MESSAGE"
+              echo '```'
+            else
+              echo '```json'
+              echo "$RESULT"
+              echo '```'
+            fi
+            if [ -n "$DETAILS_URL" ]; then
+              echo
+              echo "[Open test suite result on the instance]($DETAILS_URL)"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          exit $EXIT_CODE
 
   publish:
     needs: atf-test
