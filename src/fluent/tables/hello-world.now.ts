@@ -8,6 +8,7 @@ export const x_snc_dev_pass_b_hello_world = Table({
     schema: {
         title: StringColumn({ label: 'Title', mandatory: true }),
         task: ReferenceColumn({ label: 'Task', referenceTable: 'task' }),
+        notes: StringColumn({ label: 'Notes', maxLength: 2000 }),
     },
 })
 
