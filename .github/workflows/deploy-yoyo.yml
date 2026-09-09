@@ -1,0 +1,33 @@
+name: Deploy to yoyo (test)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify keys.ts is up to date
+        run: npx @servicenow/sdk build --frozenKeys
+
+      - name: Install on yoyo
+        env:
+          SN_SDK_NODE_ENV: SN_SDK_CI_INSTALL
+          SN_SDK_AUTH_TYPE: basic
+          SN_SDK_INSTANCE_URL: https://yoyo.service-now.com
+          SN_SDK_USER: jon.lind
+          SN_SDK_USER_PWD: ${{ secrets.SN_SDK_USER_PWD }}
+        run: npx @servicenow/sdk install
