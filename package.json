@@ -13,7 +13,7 @@
         "types": "npx @servicenow/sdk dependencies"
     },
     "devDependencies": {
-        "@servicenow/sdk": "4.11.2",
+        "@servicenow/sdk": "4.12.0",
         "@servicenow/glide": "27.0.5"
     }
 }

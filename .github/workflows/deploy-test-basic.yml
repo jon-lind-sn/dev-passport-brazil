@@ -1,4 +1,4 @@
-name: Build, test, and promote to prod
+name: Build, test, and promote to prod (basic auth)
 
 on:
   push:
