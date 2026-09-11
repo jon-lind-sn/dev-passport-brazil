@@ -1,6 +1,6 @@
 {
     "name": "dev-passport-brazil",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "description": "",
     "license": "UNLICENSED",
     "imports": {
@@ -10,10 +10,12 @@
         "build": "npx @servicenow/sdk build",
         "deploy": "npx @servicenow/sdk install",
         "transform": "npx @servicenow/sdk transform",
-        "types": "npx @servicenow/sdk dependencies"
+        "types": "npx @servicenow/sdk dependencies",
+        "prepare": "node scripts/prepare.js"
     },
     "devDependencies": {
         "@servicenow/sdk": "4.12.0",
-        "@servicenow/glide": "27.0.5"
+        "@servicenow/glide": "27.0.5",
+        "husky": "^9.1.7"
     }
 }
