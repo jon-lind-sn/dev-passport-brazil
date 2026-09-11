@@ -1,5 +1,4 @@
 .DS_Store
-.npmrc
 .now/
 dist/
 node_modules/
