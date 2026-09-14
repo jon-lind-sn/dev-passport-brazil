@@ -7,4 +7,4 @@
 
 ## Releases
 
-- Always increment the `version` field in `package.json` whenever pushing changes, even if not explicitly asked. The CI/CD pipeline (`.github/workflows/deploy-test-basic.yml`) publishes to the ServiceNow Application Repository via `now-sdk cicd publish`, which defaults `--app-version` from this field. Application Repository versions are immutable, so publishing a version that already exists fails — every push meant to ship needs a new version number.
+- Always increment the `version` field in `package.json` whenever pushing changes, even if not explicitly asked. The CI/CD pipeline (`.github/workflows/deploy-test-basic-main.yml`, sharing its build/install/ATF steps with `.github/workflows/deploy-test-basic-pr.yml` via `.github/workflows/test-and-validate.yml`) publishes to the ServiceNow Application Repository via `now-sdk cicd publish`, which defaults `--app-version` from this field. Application Repository versions are immutable, so publishing a version that already exists fails — every push meant to ship needs a new version number.
