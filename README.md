@@ -10,11 +10,11 @@ Manually clicking through Update Set imports or "Install" buttons works until it
 
 The pipeline is split across three files, all built entirely on the ServiceNow SDK's own CI/CD commands (`now-sdk install` and `now-sdk cicd ...`) — GitHub Actions is just the runner that calls them in order:
 
-- [`.github/workflows/test-and-validate.yml`](.github/workflows/test-and-validate.yml) — a **reusable** workflow (`workflow_call`) holding the build/install/ATF steps shared by both pipelines below, so there's one copy of this logic to maintain:
+- [`.github/workflows/_validate-basic-auth.yml`](.github/workflows/_validate-basic-auth.yml) — a **reusable** workflow (`workflow_call`) holding the build/install/ATF steps shared by both pipelines below, so there's one copy of this logic to maintain (the leading `_` marks it as a library workflow, not a trigger):
   1. **`build-and-install-test`** — builds the Fluent source and installs it directly onto a test instance (`now-sdk install`), so the change is live somewhere immediately.
   2. **`atf-test`** — runs the app's Automated Test Framework regression suite against that same instance (`now-sdk cicd testsuite run`), gating the rest of the pipeline on the result.
-- [`.github/workflows/deploy-test-basic-pr.yml`](.github/workflows/deploy-test-basic-pr.yml) — runs on every pull request against `main` (and again on every subsequent push to that PR's branch). Calls the reusable workflow above so a broken change shows up as a check on the PR *before* it's merged, and pushing a fix to the same branch automatically re-runs it.
-- [`.github/workflows/deploy-test-basic-main.yml`](.github/workflows/deploy-test-basic-main.yml) — runs on every push to `main` (i.e. after a PR merges). Calls the same reusable workflow again as a safety net (in case `main` drifted from what the PR tested), then continues:
+- [`.github/workflows/pr-validation-basic-auth.yml`](.github/workflows/pr-validation-basic-auth.yml) — runs on every pull request against `main` (and again on every subsequent push to that PR's branch). Calls the reusable workflow above so a broken change shows up as a check on the PR *before* it's merged, and pushing a fix to the same branch automatically re-runs it.
+- [`.github/workflows/deploy-main-basic-auth.yml`](.github/workflows/deploy-main-basic-auth.yml) — runs on every push to `main` (i.e. after a PR merges). Calls the same reusable workflow again as a safety net (in case `main` drifted from what the PR tested), then continues:
   3. **`publish`** — publishes the tested version to ServiceNow's Application Repository (`now-sdk cicd publish`), an immutable, versioned artifact store.
   4. **`approve-prod`** — a manual approval gate (a GitHub Environment) before anything touches production.
   5. **`install-prod`** — installs that exact published version onto the production instance (`now-sdk cicd install`).
@@ -55,3 +55,4 @@ Treat the generated YAML as a starting point — instance URLs, credential secre
 This repo also uses a couple of small, unrelated conveniences that aren't part of the CI/CD story above:
 
 - **[Husky](https://www.npmjs.com/package/husky)** manages a local `pre-push` git hook (`scripts/verify-push.js`) that blocks pushing directly to `main` and blocks pushing a `package.json` version that hasn't advanced past `origin/main`'s. It only runs on a developer's machine — it's skipped entirely in CI.
+- **[`docs/version-bump-automation.md`](docs/version-bump-automation.md)** sketches an idea for having CI bump `package.json`'s version automatically during the PR. Not implemented yet.

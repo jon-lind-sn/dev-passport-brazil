@@ -1,4 +1,4 @@
-name: Build, install, and run ATF suite (reusable)
+name: Validate (build, install, ATF)
 
 on:
   workflow_call:
