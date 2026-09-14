@@ -46,6 +46,10 @@ declare global {
                         table: 'sys_atf_test'
                         id: 'c1c6d98c44a5421fbfd11ed783f415dd'
                     }
+                    hello_world_rejects_inactive_task_rule: {
+                        table: 'sys_script'
+                        id: '4afff8236cf04844b095693051c60c15'
+                    }
                     hello_world_requires_title_and_task: {
                         table: 'sys_atf_test'
                         id: 'ac35b3b6cf3c48b0a8591b2a793eeda6'
@@ -82,6 +86,10 @@ declare global {
                     package_json: {
                         table: 'sys_module'
                         id: '415b75cbdbb64090ba136c5909fb4fe0'
+                    }
+                    'src_server_business-rules_reject-inactive-task_ts': {
+                        table: 'sys_module'
+                        id: '8d4ee10425ff4799a6a4d5525da69b81'
                     }
                 }
                 composite: [
