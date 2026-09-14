@@ -7,7 +7,7 @@ export const helloWorldRejectsInactiveTaskRule = BusinessRule({
     name: 'Reject inactive Task on Hello World',
     table: 'x_snc_dev_pass_b_hello_world',
     when: 'before',
-    active: false,
+    active: true,
     action: ['insert'],
     filterCondition: 'task.active=false',
     script: rejectInactiveTask,
