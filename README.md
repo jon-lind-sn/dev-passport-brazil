@@ -8,13 +8,18 @@ Manually clicking through Update Set imports or "Install" buttons works until it
 
 ## How this repo's pipeline works
 
-The pipeline lives in [`.github/workflows/deploy-test-basic.yml`](.github/workflows/deploy-test-basic.yml) and runs automatically on every push to `main`. It's built entirely on the ServiceNow SDK's own CI/CD commands (`now-sdk install` and `now-sdk cicd ...`) — GitHub Actions is just the runner that calls them in order:
+The pipeline is split across three files, all built entirely on the ServiceNow SDK's own CI/CD commands (`now-sdk install` and `now-sdk cicd ...`) — GitHub Actions is just the runner that calls them in order:
 
-1. **`build-and-install-test`** — builds the Fluent source and installs it directly onto a test instance (`now-sdk install`), so the change is live somewhere immediately.
-2. **`atf-test`** — runs the app's Automated Test Framework regression suite against that same instance (`now-sdk cicd testsuite run`), gating the rest of the pipeline on the result.
-3. **`publish`** — publishes the tested version to ServiceNow's Application Repository (`now-sdk cicd publish`), an immutable, versioned artifact store.
-4. **`approve-prod`** — a manual approval gate (a GitHub Environment) before anything touches production.
-5. **`install-prod`** — installs that exact published version onto the production instance (`now-sdk cicd install`).
+- [`.github/workflows/test-and-validate.yml`](.github/workflows/test-and-validate.yml) — a **reusable** workflow (`workflow_call`) holding the build/install/ATF steps shared by both pipelines below, so there's one copy of this logic to maintain:
+  1. **`build-and-install-test`** — builds the Fluent source and installs it directly onto a test instance (`now-sdk install`), so the change is live somewhere immediately.
+  2. **`atf-test`** — runs the app's Automated Test Framework regression suite against that same instance (`now-sdk cicd testsuite run`), gating the rest of the pipeline on the result.
+- [`.github/workflows/deploy-test-basic-pr.yml`](.github/workflows/deploy-test-basic-pr.yml) — runs on every pull request against `main` (and again on every subsequent push to that PR's branch). Calls the reusable workflow above so a broken change shows up as a check on the PR *before* it's merged, and pushing a fix to the same branch automatically re-runs it.
+- [`.github/workflows/deploy-test-basic-main.yml`](.github/workflows/deploy-test-basic-main.yml) — runs on every push to `main` (i.e. after a PR merges). Calls the same reusable workflow again as a safety net (in case `main` drifted from what the PR tested), then continues:
+  3. **`publish`** — publishes the tested version to ServiceNow's Application Repository (`now-sdk cicd publish`), an immutable, versioned artifact store.
+  4. **`approve-prod`** — a manual approval gate (a GitHub Environment) before anything touches production.
+  5. **`install-prod`** — installs that exact published version onto the production instance (`now-sdk cicd install`).
+
+> **Note:** This repo doesn't have GitHub branch protection enabled (it's gated behind a paid tier here), so the PR check is informational only — a red check does **not** block the merge button. The convention is to wait for green before merging.
 
 ### Versioning matters here
 
@@ -24,8 +29,9 @@ Application Repository versions are immutable — publishing a version that's al
 
 1. Branch off `main`, make your change.
 2. Bump `version` in `package.json`.
-3. Push your branch and open a PR.
-4. Once merged to `main`, the pipeline above runs on its own — approve the production gate when you're ready to ship.
+3. Push your branch and open a PR — watch for the `validate` check to run against the test instance.
+4. If it fails, push another commit to the same branch; the check re-runs automatically.
+5. Once the check is green, merge to `main` — the pipeline re-validates, then publishes and walks through the production approval gate.
 
 ## Reproducing this pattern in a new project
 
