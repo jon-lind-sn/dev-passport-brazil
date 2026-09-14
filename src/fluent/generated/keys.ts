@@ -18,6 +18,10 @@ declare global {
                         table: 'sys_atf_test_suite'
                         id: 'd8bac3457a914d568c7d013a582c6597'
                     }
+                    find_inactive_prerequisite_task: {
+                        table: 'sys_atf_step'
+                        id: 'd9cbbe622ba24c37b59d0814d0915ab4'
+                    }
                     hello_world_mandatory_fields_policy: {
                         table: 'sys_data_policy2'
                         id: '8c139a1ee53d4f5097d693658d86b68d'
@@ -53,6 +57,7 @@ declare global {
                     insert_inactive_prerequisite_task: {
                         table: 'sys_atf_step'
                         id: 'b8264d222b9841b0b7229fdf6d8f1f0a'
+                        deleted: true
                     }
                     insert_missing_task: {
                         table: 'sys_atf_step'
@@ -160,6 +165,14 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_variable_value'
+                        id: '264e3105749c4a9090d96aeb0b0c9aa2'
+                        key: {
+                            document_key: 'd9cbbe622ba24c37b59d0814d0915ab4'
+                            variable: '02fb0027531000109e02ddeeff7b120b'
+                        }
+                    },
+                    {
                         table: 'sys_dictionary'
                         id: '279984c894a1418a9d7eb3a18999e664'
                         key: {
@@ -237,6 +250,7 @@ declare global {
                     {
                         table: 'sys_variable_value'
                         id: '55630bfa7fe5431f803319c72538ea47'
+                        deleted: true
                         key: {
                             document_key: 'b8264d222b9841b0b7229fdf6d8f1f0a'
                             variable: '90144b535320220002c6435723dc3488'
@@ -273,6 +287,14 @@ declare global {
                             name: 'x_snc_dev_pass_b_hello_world'
                             element: 'title'
                             language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_variable_value'
+                        id: '67739166865a43eda2434a6573f46a57'
+                        key: {
+                            document_key: 'd9cbbe622ba24c37b59d0814d0915ab4'
+                            variable: '78b8d86b531000109e02ddeeff7b12f3'
                         }
                     },
                     {
@@ -367,6 +389,7 @@ declare global {
                     {
                         table: 'sys_variable_value'
                         id: 'a1cd95e492c245e2afcb40bfdcce4a1a'
+                        deleted: true
                         key: {
                             document_key: 'b8264d222b9841b0b7229fdf6d8f1f0a'
                             variable: '9024a37f671003007ba405225685efe5'
@@ -382,7 +405,16 @@ declare global {
                     },
                     {
                         table: 'sys_variable_value'
+                        id: 'ac29702f72c64551807bf3bd8357be33'
+                        key: {
+                            document_key: 'd9cbbe622ba24c37b59d0814d0915ab4'
+                            variable: 'b86c0427531000109e02ddeeff7b1227'
+                        }
+                    },
+                    {
+                        table: 'sys_variable_value'
                         id: 'b16a5f4f75394969a283a15d780b5cd1'
+                        deleted: true
                         key: {
                             document_key: 'b8264d222b9841b0b7229fdf6d8f1f0a'
                             variable: 'dd54cf535320220002c6435723dc34fd'
@@ -471,6 +503,14 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_variable_value'
+                        id: 'e4be91d037bd49509703ff09c2c3925f'
+                        key: {
+                            document_key: 'd9cbbe622ba24c37b59d0814d0915ab4'
+                            variable: '915990ab531000109e02ddeeff7b12f8'
+                        }
+                    },
+                    {
                         table: 'sys_atf_test_suite_test'
                         id: 'e964aaac7027472b929fed144d097912'
                         key: {
@@ -516,6 +556,7 @@ declare global {
                     {
                         table: 'sys_variable_value'
                         id: 'f309a3badcad4dc0b53198ebfe469754'
+                        deleted: true
                         key: {
                             document_key: 'b8264d222b9841b0b7229fdf6d8f1f0a'
                             variable: 'e6e3c7535320220002c6435723dc3496'
