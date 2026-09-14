@@ -62,14 +62,15 @@ export const helloWorldRejectsInactiveTask = Test(
         failOnServerError: false,
     },
     (atf) => {
-        const inactiveTask = atf.server.recordInsert({
-            $id: Now.ID['insert_inactive_prerequisite_task'],
+        // Inserting a fresh incident with active=false fails on this instance --
+        // an out-of-box Data Policy makes Resolution code/Close notes mandatory
+        // for that state, and this test isn't exercising that policy. Find an
+        // existing inactive incident instead of creating one.
+        const inactiveTask = atf.server.recordQuery({
+            $id: Now.ID['find_inactive_prerequisite_task'],
             table: 'incident',
-            fieldValues: {
-                short_description: 'Inactive prerequisite task for Hello World inactive-task test',
-                active: false,
-            },
-            assert: 'record_successfully_inserted',
+            fieldValues: 'active=false',
+            assert: 'records_match_query',
         })
 
         atf.server.recordInsert({
@@ -77,7 +78,7 @@ export const helloWorldRejectsInactiveTask = Test(
             table: 'x_snc_dev_pass_b_hello_world',
             fieldValues: {
                 title: 'Referencing an inactive task',
-                task: inactiveTask.record_id,
+                task: inactiveTask.first_record,
             },
             assert: 'record_not_inserted',
         })
