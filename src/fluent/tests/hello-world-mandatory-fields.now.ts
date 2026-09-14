@@ -52,9 +52,41 @@ export const helloWorldRequiresTitleAndTask = Test(
     }
 )
 
+export const helloWorldRejectsInactiveTask = Test(
+    {
+        $id: Now.ID['hello_world_rejects_inactive_task'],
+        name: 'Hello World rejects inactive Task',
+        description: 'Attempts to insert a Hello World record referencing a Task that is active=false and asserts the insert is rejected -- a Hello World record should only ever reference an active Task',
+        active: true,
+        // See helloWorldRequiresTitleAndTask above for why this must stay false on this instance.
+        failOnServerError: false,
+    },
+    (atf) => {
+        const inactiveTask = atf.server.recordInsert({
+            $id: Now.ID['insert_inactive_prerequisite_task'],
+            table: 'incident',
+            fieldValues: {
+                short_description: 'Inactive prerequisite task for Hello World inactive-task test',
+                active: false,
+            },
+            assert: 'record_successfully_inserted',
+        })
+
+        atf.server.recordInsert({
+            $id: Now.ID['insert_hello_world_with_inactive_task'],
+            table: 'x_snc_dev_pass_b_hello_world',
+            fieldValues: {
+                title: 'Referencing an inactive task',
+                task: inactiveTask.record_id,
+            },
+            assert: 'record_not_inserted',
+        })
+    }
+)
+
 export const devPassportBrazilRegressionSuite = TestSuite({
     $id: Now.ID['dev_passport_brazil_regression_suite'],
     name: 'Dev Passport Brazil Regression Suite',
     description: 'Regression tests for the Dev Passport Brazil app, run by the CI/CD pipeline against the test instance before publishing.',
-    tests: [helloWorldRequiresTitleAndTask],
+    tests: [helloWorldRequiresTitleAndTask, helloWorldRejectsInactiveTask],
 })
