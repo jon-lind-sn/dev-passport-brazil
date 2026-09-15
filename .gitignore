@@ -6,3 +6,8 @@ target/
 *.tsbuildinfo
 .jest_cache
 .playwright-cli/
+# Debug script with real OAuth credentials — never commit
+test-yoyo-oauth-cicd.sh
+SDK_API_SURFACE.md
+SDK_AUTH_SCOPE_PROPOSAL.md
+RESTART.md
