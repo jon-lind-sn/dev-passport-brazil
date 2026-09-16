@@ -8,7 +8,14 @@ on:
 jobs:
   validate:
     uses: ./.github/workflows/_validate.yml
-    secrets: inherit
+    with:
+      instance-url: https://yoyo.service-now.com
+      auth-type: ${{ vars.SN_SDK_TEST_AUTH_TYPE || 'oauth' }}
+      alias: test
+    secrets:
+      basic-password: ${{ secrets.SN_SDK_USER_PWD }}
+      oauth-client-id: ${{ secrets.SN_SDK_TEST_OAUTH_CLIENT_ID }}
+      oauth-client-secret: ${{ secrets.SN_SDK_TEST_OAUTH_CLIENT_SECRET }}
 
   publish:
     needs: validate
@@ -25,15 +32,21 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: now-sdk auth
+        id: auth
+        uses: ./.github/actions/sn-sdk-auth
+        with:
+          auth-type: ${{ vars.SN_SDK_TEST_AUTH_TYPE || 'oauth' }}
+          instance-url: https://yoyo.service-now.com
+          alias: test
+          basic-password: ${{ secrets.SN_SDK_USER_PWD }}
+          oauth-client-id: ${{ secrets.SN_SDK_TEST_OAUTH_CLIENT_ID }}
+          oauth-client-secret: ${{ secrets.SN_SDK_TEST_OAUTH_CLIENT_SECRET }}
+
       - name: Publish to Application Repository
-        env:
-          SN_SDK_NODE_ENV: SN_SDK_CI_INSTALL
-          SN_SDK_AUTH_TYPE: oauth
-          SN_SDK_INSTANCE_URL: https://yoyo.service-now.com
-          SN_SDK_OAUTH_CLIENT_ID: ${{ secrets.SN_SDK_TEST_OAUTH_CLIENT_ID }}
-          SN_SDK_OAUTH_CLIENT_SECRET: ${{ secrets.SN_SDK_TEST_OAUTH_CLIENT_SECRET }}
         run: |
           npx @servicenow/sdk cicd publish \
+            ${{ steps.auth.outputs.cicd-auth-flag }} \
             -o json
 
   approve-prod:
@@ -59,13 +72,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: now-sdk auth
+        id: auth
+        uses: ./.github/actions/sn-sdk-auth
+        with:
+          auth-type: ${{ vars.SN_SDK_PROD_AUTH_TYPE || 'basic' }}
+          instance-url: https://zorb.service-now.com
+          alias: prod
+          basic-password: ${{ secrets.SN_SDK_PROD_USER_PWD }}
+          oauth-client-id: ${{ secrets.SN_SDK_PROD_OAUTH_CLIENT_ID }}
+          oauth-client-secret: ${{ secrets.SN_SDK_PROD_OAUTH_CLIENT_SECRET }}
+
       - name: Install published app on zorb
-        env:
-          SN_SDK_NODE_ENV: SN_SDK_CI_INSTALL
-          SN_SDK_AUTH_TYPE: oauth
-          SN_SDK_INSTANCE_URL: https://zorb.service-now.com
-          SN_SDK_OAUTH_CLIENT_ID: ${{ secrets.SN_SDK_PROD_OAUTH_CLIENT_ID }}
-          SN_SDK_OAUTH_CLIENT_SECRET: ${{ secrets.SN_SDK_PROD_OAUTH_CLIENT_SECRET }}
         run: |
           npx @servicenow/sdk cicd install \
+            ${{ steps.auth.outputs.cicd-auth-flag }} \
             -o json

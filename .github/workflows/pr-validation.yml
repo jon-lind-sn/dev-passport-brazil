@@ -8,4 +8,11 @@ on:
 jobs:
   validate:
     uses: ./.github/workflows/_validate.yml
-    secrets: inherit
+    with:
+      instance-url: https://yoyo.service-now.com
+      auth-type: ${{ vars.SN_SDK_TEST_AUTH_TYPE || 'oauth' }}
+      alias: test
+    secrets:
+      basic-password: ${{ secrets.SN_SDK_USER_PWD }}
+      oauth-client-id: ${{ secrets.SN_SDK_TEST_OAUTH_CLIENT_ID }}
+      oauth-client-secret: ${{ secrets.SN_SDK_TEST_OAUTH_CLIENT_SECRET }}
