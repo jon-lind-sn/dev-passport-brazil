@@ -131,6 +131,7 @@ if [ "$TEST_AUTH" = "basic" ]; then
   set_secret_if_provided SN_SDK_USER_PWD "$TEST_PWD"
 else
   echo "  Get these from the OAuth Application Registry on $TEST_URL (see TUTORIAL.md 'ServiceNow-instance-side setup' if you haven't created one yet). Leave blank to keep an existing secret."
+  echo "  Tip: validate a credential first — SN_SDK_NODE_ENV=SN_SDK_CI_INSTALL SN_SDK_AUTH_TYPE=oauth SN_SDK_INSTANCE_URL=$TEST_URL SN_SDK_OAUTH_CLIENT_ID=... SN_SDK_OAUTH_CLIENT_SECRET=... npx @servicenow/sdk query sys_user -q active=true --limit 1 -o json (see TUTORIAL.md)."
   TEST_CLIENT_ID="$(ask "  Client ID")"
   TEST_CLIENT_SECRET="$(ask_secret "  Client secret")"
   set_secret_if_provided SN_SDK_TEST_OAUTH_CLIENT_ID "$TEST_CLIENT_ID"
@@ -147,6 +148,7 @@ if [ "$PROD_AUTH" = "basic" ]; then
   set_secret_if_provided SN_SDK_PROD_USER_PWD "$PROD_PWD"
 else
   echo "  Get these from the OAuth Application Registry on $PROD_URL (see TUTORIAL.md 'ServiceNow-instance-side setup' if you haven't created one yet). Leave blank to keep an existing secret."
+  echo "  Tip: validate a credential first — SN_SDK_NODE_ENV=SN_SDK_CI_INSTALL SN_SDK_AUTH_TYPE=oauth SN_SDK_INSTANCE_URL=$PROD_URL SN_SDK_OAUTH_CLIENT_ID=... SN_SDK_OAUTH_CLIENT_SECRET=... npx @servicenow/sdk query sys_user -q active=true --limit 1 -o json (see TUTORIAL.md)."
   PROD_CLIENT_ID="$(ask "  Client ID")"
   PROD_CLIENT_SECRET="$(ask_secret "  Client secret")"
   set_secret_if_provided SN_SDK_PROD_OAUTH_CLIENT_ID "$PROD_CLIENT_ID"

@@ -23,47 +23,34 @@ Both auth types live in this same codebase — it's a parameter, not a fork. `.g
 
 ## Choosing Basic vs OAuth
 
-| | OAuth Client Credentials | Basic |
-|---|---|---|
-| Setup effort | One-time OAuth app + service user setup | None — uses an existing user |
-| Credential rotation | Rotate client secret (no password change) | Rotate user password |
-| Network surface | Password never sent; token fetched once per run | Password sent on every request |
-| Best for | Production CI, regulated environments | PDIs, sandbox, fast iteration |
+OAuth is recommended: the client secret authenticates the CI system itself rather than impersonating a person's login, so a leaked secret can be rotated without touching anyone's account password, and there's no live password sitting in a CI variable.
 
-OAuth is recommended for anything beyond quick iteration: the client secret authenticates the CI system itself rather than impersonating a person's login, so a leaked secret can be rotated without touching anyone's account password, and there's no live password sitting in a CI variable that a compromised job could exfiltrate and reuse elsewhere.
-
-Both options are documented in full by the ServiceNow SDK itself — this tutorial's instance-side steps below are taken directly from it: https://servicenow.github.io/sdk/config/ci-integration#authentication-for-now-sdk-install (or run `now-sdk explain ci-integration` locally).
+Both options are documented in full by the ServiceNow SDK itself: https://servicenow.github.io/sdk/config/ci-integration#authentication-for-now-sdk-install (or run `now-sdk explain ci-integration` locally).
 
 ## Step 1: ServiceNow-instance-side setup
 
 ### Basic auth
 
-Nothing to configure — you just need the username and password of an existing instance user with the `admin` role. Prefer OAuth below for anything beyond quick iteration.
+Nothing to configure — you just need the username and password of an existing instance user with the `admin` role. 
 
 ### OAuth client credentials
 
-Complete all three steps below on the instance, or the token endpoint will reject the request.
+Complete all three steps below on the instance.
 
 **1. Configure the service user**
 
 Create or choose a user that will later be mapped as the OAuth application user in step 3. It must:
 - Have the `admin` role.
-- Have **Identity Type = Human** on the `sys_user` record. The SDK's installer processor requires a human-type user account.
+- Have **Identity Type = Human** on the `sys_user` record (you may need to modify the form's view to add this field). 
 
 **2. Enable the client_credentials grant on the instance**
 
-The system property `glide.oauth.inbound.client.credential.grant_type.enabled` must exist and be set to `true`.
-
-If it doesn't already exist, create it in `sys_properties`:
-- Name: `glide.oauth.inbound.client.credential.grant_type.enabled`
-- Type: `true | false`
-- Value: `true`
-
-See [KB1645212](https://support.servicenow.com/kb?id=kb_article_view&sysparm_article=KB1645212) for details. Without this, the token endpoint rejects `grant_type=client_credentials` regardless of how the OAuth app is configured.
+The system property `glide.oauth.inbound.client.credential.grant_type.enabled` of type `true | false` must exist and be 
+set to `true`.  If it does not exist in `sys_properties` create it. [KB1645212](https://support.servicenow.com/kb?id=kb_article_view&sysparm_article=KB1645212)
 
 **3. Create the OAuth Application Registry**
 
-Navigate: **System OAuth → Application Registry → New → New Inbound Integration Experience → New Integration → OAuth Client Credentials Grant**
+Navigate: **System OAuth → Application Registry → New Inbound Integration Experience → New Integration → OAuth Client Credentials Grant**
 
 - **Name**: anything descriptive, e.g. "SDK CI"
 - **Provider Name**: `ServiceNow SDK` (the value isn't checked, but you must type something in manually)
@@ -73,6 +60,45 @@ Navigate: **System OAuth → Application Registry → New → New Inbound Integr
 - Do **not** use an OpenID Connect (OIDC) provider for this registry — OIDC providers don't issue tokens for the `client_credentials` grant
 
 Note the resulting **Client ID** and **Client Secret** — you'll land these as GitHub secrets in the next step.
+
+**Validate the credentials before pushing them to GitHub**
+
+Preferred: use `now-sdk` itself, with the exact same env vars the CI pipeline uses, then run a cheap read-only query. This exercises the real code path (`client_credentials` token fetch *and* an authenticated API call) instead of just the token endpoint:
+
+```bash
+export SN_SDK_NODE_ENV=SN_SDK_CI_INSTALL
+export SN_SDK_AUTH_TYPE=oauth
+export SN_SDK_INSTANCE_URL=https://your-instance.service-now.com
+export SN_SDK_OAUTH_CLIENT_ID=<client-id>
+export SN_SDK_OAUTH_CLIENT_SECRET=<client-secret>
+
+npx @servicenow/sdk query sys_user -q "active=true" --limit 1 -o json
+```
+
+A working credential returns `{"ok":true, ...}` with a record; a bad one returns a structured error, e.g. `{"ok":false,"error":{"message":"OAuth client_credentials token request failed: 401 Unauthorized — ..."}}`.
+
+Alternative: test the `client_credentials` grant directly against the instance's token endpoint with `curl` (doesn't require `now-sdk`/Node, but only validates the token fetch, not an actual API call):
+
+```bash
+curl -s -X POST "https://your-instance.service-now.com/oauth_token.do" \
+  -d grant_type=client_credentials \
+  -d client_id="<client-id>" \
+  -d client_secret="<client-secret>"
+```
+
+A working credential returns an access token:
+
+```json
+{"access_token":"...","token_type":"Bearer","expires_in":"1799","scope":""}
+```
+
+A bad client ID/secret, a registry not yet unrestricted, or the system property from step 2 still being `false` all come back as an error instead, e.g.:
+
+```json
+{"error":"invalid_client","error_description":"..."}
+```
+
+Don't move on to Step 2 until this returns an `access_token`.
 
 ## Step 2: GitHub-side setup
 

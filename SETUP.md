@@ -28,6 +28,28 @@ For the GitHub-side half of this (instance URLs, auth-type variables, and secret
    - Do not use an OpenID Connect (OIDC) provider for this registry
    - Resulting Client ID / Client Secret → `SN_SDK_OAUTH_CLIENT_ID` / `SN_SDK_OAUTH_CLIENT_SECRET`
 
+**Validate before setting as GitHub secrets** — preferred, via `now-sdk` (exercises the real CI code path):
+
+```bash
+SN_SDK_NODE_ENV=SN_SDK_CI_INSTALL SN_SDK_AUTH_TYPE=oauth \
+SN_SDK_INSTANCE_URL=https://your-instance.service-now.com \
+SN_SDK_OAUTH_CLIENT_ID=<client-id> SN_SDK_OAUTH_CLIENT_SECRET=<client-secret> \
+npx @servicenow/sdk query sys_user -q "active=true" --limit 1 -o json
+```
+
+Success → `{"ok":true, ...}`. Failure → `{"ok":false,"error":{"message":"OAuth client_credentials token request failed: ..."}}`.
+
+Alternative (token-endpoint only, no `now-sdk`/Node required):
+
+```bash
+curl -s -X POST "https://your-instance.service-now.com/oauth_token.do" \
+  -d grant_type=client_credentials \
+  -d client_id="<client-id>" \
+  -d client_secret="<client-secret>"
+```
+
+Success → `{"access_token":"...", ...}`. Failure → `{"error":"invalid_client", ...}` (bad credentials, registry still scope-restricted, or the system property from step 2 not `true`).
+
 ## GitHub repo configuration
 
 Instance URLs, per instance, as a repo **Variable** with **no default** — the pipeline fails if either is unset:
