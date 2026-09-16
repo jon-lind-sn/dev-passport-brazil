@@ -38,22 +38,30 @@ runs:
     - name: Export basic-auth env and CLI alias
       if: inputs.auth-type == 'basic'
       shell: bash
+      env:
+        SN_SDK_USER: ${{ inputs.basic-username }}
+        SN_SDK_USER_PWD: ${{ inputs.basic-password }}
+        INSTANCE_URL: ${{ inputs.instance-url }}
+        ALIAS: ${{ inputs.alias }}
       run: |
-        echo "SN_SDK_USER=${{ inputs.basic-username }}" >> "$GITHUB_ENV"
-        echo "SN_SDK_USER_PWD=${{ inputs.basic-password }}" >> "$GITHUB_ENV"
-        echo "${{ inputs.basic-password }}" | npx @servicenow/sdk auth \
-          --add ${{ inputs.instance-url }} \
+        echo "SN_SDK_USER=${SN_SDK_USER}" >> "$GITHUB_ENV"
+        echo "SN_SDK_USER_PWD=${SN_SDK_USER_PWD}" >> "$GITHUB_ENV"
+        echo "${SN_SDK_USER_PWD}" | npx @servicenow/sdk auth \
+          --add "${INSTANCE_URL}" \
           --type basic \
-          --alias ${{ inputs.alias }} \
-          --username ${{ inputs.basic-username }} \
+          --alias "${ALIAS}" \
+          --username "${SN_SDK_USER}" \
           --password-stdin
 
     - name: Export oauth env
       if: inputs.auth-type == 'oauth'
       shell: bash
+      env:
+        SN_SDK_OAUTH_CLIENT_ID: ${{ inputs.oauth-client-id }}
+        SN_SDK_OAUTH_CLIENT_SECRET: ${{ inputs.oauth-client-secret }}
       run: |
-        echo "SN_SDK_OAUTH_CLIENT_ID=${{ inputs.oauth-client-id }}" >> "$GITHUB_ENV"
-        echo "SN_SDK_OAUTH_CLIENT_SECRET=${{ inputs.oauth-client-secret }}" >> "$GITHUB_ENV"
+        echo "SN_SDK_OAUTH_CLIENT_ID=${SN_SDK_OAUTH_CLIENT_ID}" >> "$GITHUB_ENV"
+        echo "SN_SDK_OAUTH_CLIENT_SECRET=${SN_SDK_OAUTH_CLIENT_SECRET}" >> "$GITHUB_ENV"
 
     - name: Set cicd-auth-flag output
       id: set-flag
