@@ -1,0 +1,66 @@
+name: now-sdk auth
+description: Configure now-sdk authentication for either basic or oauth, and expose a --auth flag for cicd subcommands.
+
+inputs:
+  auth-type:
+    description: "basic or oauth"
+    required: true
+  instance-url:
+    required: true
+  alias:
+    description: Alias to use for the basic-auth CLI credential
+    required: true
+  basic-username:
+    required: false
+    default: jon.lind
+  basic-password:
+    required: false
+  oauth-client-id:
+    required: false
+  oauth-client-secret:
+    required: false
+
+outputs:
+  cicd-auth-flag:
+    description: "--auth <alias> for basic mode, empty for oauth mode"
+    value: ${{ steps.set-flag.outputs.flag }}
+
+runs:
+  using: composite
+  steps:
+    - name: Export common env
+      shell: bash
+      run: |
+        echo "SN_SDK_NODE_ENV=SN_SDK_CI_INSTALL" >> "$GITHUB_ENV"
+        echo "SN_SDK_AUTH_TYPE=${{ inputs.auth-type }}" >> "$GITHUB_ENV"
+        echo "SN_SDK_INSTANCE_URL=${{ inputs.instance-url }}" >> "$GITHUB_ENV"
+
+    - name: Export basic-auth env and CLI alias
+      if: inputs.auth-type == 'basic'
+      shell: bash
+      run: |
+        echo "SN_SDK_USER=${{ inputs.basic-username }}" >> "$GITHUB_ENV"
+        echo "SN_SDK_USER_PWD=${{ inputs.basic-password }}" >> "$GITHUB_ENV"
+        echo "${{ inputs.basic-password }}" | npx @servicenow/sdk auth \
+          --add ${{ inputs.instance-url }} \
+          --type basic \
+          --alias ${{ inputs.alias }} \
+          --username ${{ inputs.basic-username }} \
+          --password-stdin
+
+    - name: Export oauth env
+      if: inputs.auth-type == 'oauth'
+      shell: bash
+      run: |
+        echo "SN_SDK_OAUTH_CLIENT_ID=${{ inputs.oauth-client-id }}" >> "$GITHUB_ENV"
+        echo "SN_SDK_OAUTH_CLIENT_SECRET=${{ inputs.oauth-client-secret }}" >> "$GITHUB_ENV"
+
+    - name: Set cicd-auth-flag output
+      id: set-flag
+      shell: bash
+      run: |
+        if [ "${{ inputs.auth-type }}" = "basic" ]; then
+          echo "flag=--auth ${{ inputs.alias }}" >> "$GITHUB_OUTPUT"
+        else
+          echo "flag=" >> "$GITHUB_OUTPUT"
+        fi
