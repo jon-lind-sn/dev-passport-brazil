@@ -8,6 +8,6 @@ target/
 .playwright-cli/
 # Debug script with real OAuth credentials — never commit
 test-yoyo-oauth-cicd.sh
-SDK_API_SURFACE.md
-SDK_AUTH_SCOPE_PROPOSAL.md
-RESTART.md
+
+# Personal working notes — not shared with other contributors
+local-notes/

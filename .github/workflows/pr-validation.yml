@@ -9,7 +9,7 @@ jobs:
   validate:
     uses: ./.github/workflows/_validate.yml
     with:
-      instance-url: https://yoyo.service-now.com
+      instance-url: ${{ vars.SN_SDK_TEST_INSTANCE_URL }}
       auth-type: ${{ vars.SN_SDK_TEST_AUTH_TYPE || 'oauth' }}
       alias: test
     secrets:

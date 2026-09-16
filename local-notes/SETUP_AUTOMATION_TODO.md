@@ -45,8 +45,8 @@ package that provisions this automatically. Tracking the pieces here as we go.
   need to land as repo secrets: `SN_SDK_TEST_OAUTH_CLIENT_ID` /
   `SN_SDK_TEST_OAUTH_CLIENT_SECRET` (yoyo) and, later,
   `SN_SDK_PROD_OAUTH_CLIENT_ID` / `SN_SDK_PROD_OAUTH_CLIENT_SECRET` (zorb).
-- Currently done manually per the tutorial's step-by-step (repo Settings →
-  Secrets and variables → Actions → New repository secret).
+- Currently done manually per `TUTORIAL.md` / `SETUP.md` (`gh secret set`, or
+  repo Settings → Secrets and variables → Actions → New repository secret).
 - Once the manual steps are proven end-to-end, this part is realistically
   automatable — setting a repo secret from a value we already have in hand
   is a straightforward scripted step (unlike the service user piece above),
