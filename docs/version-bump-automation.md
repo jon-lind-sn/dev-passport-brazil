@@ -13,11 +13,11 @@ is client-side only.
 ## Proposed design
 
 Bump the version automatically **on the PR branch itself**, as part of the existing
-`pr-validation-basic-auth.yml` workflow, before the merge happens — so the merge commit that lands on
+`pr-validation.yml` workflow, before the merge happens — so the merge commit that lands on
 `main` already carries the correct version. No separate post-merge bump commit, and no risk of a
 bot-push-to-main triggering the main pipeline in a loop.
 
-1. Add a `bump-version` job to `pr-validation-basic-auth.yml`, running before the existing `validate`
+1. Add a `bump-version` job to `pr-validation.yml`, running before the existing `validate`
    job:
    - Checkout the PR's head branch (`ref: ${{ github.event.pull_request.head.ref }}`).
    - Read `main`'s current `package.json` version via `git show origin/main:package.json` and

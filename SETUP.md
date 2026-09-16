@@ -1,0 +1,62 @@
+# CI/CD auth setup reference
+
+Dense, copy-pasteable reference for configuring this pipeline's authentication. Written for an AI coding assistant loading it into context to help a user replicate this setup, or for a human who just wants the exact values. For narrative explanation, see [TUTORIAL.md](TUTORIAL.md); for the switch mechanics, see [.github/workflows/README.md](.github/workflows/README.md).
+
+For the GitHub-side half of this (instance URLs, auth-type variables, and secrets), `./scripts/setup-cicd.sh` automates everything below — run it interactively, or non-interactively with `--test basic|oauth --prod basic|oauth --repo <owner>/<repo>` (it still prompts for instance URLs and credentials). Re-running it leaves any secret unchanged if you leave that prompt blank.
+
+## `now-sdk install` environment variables
+
+| Variable | Required | basic | oauth |
+|---|---|---|---|
+| `SN_SDK_NODE_ENV` | yes | `SN_SDK_CI_INSTALL` | `SN_SDK_CI_INSTALL` |
+| `SN_SDK_AUTH_TYPE` | oauth: yes, basic: no (default) | `basic` or unset | `oauth` |
+| `SN_SDK_INSTANCE_URL` | yes | full instance URL | full instance URL |
+| `SN_SDK_USER` | yes (basic) | username | — |
+| `SN_SDK_USER_PWD` | yes (basic) | password | — |
+| `SN_SDK_OAUTH_CLIENT_ID` | yes (oauth) | — | OAuth Application Registry client_id |
+| `SN_SDK_OAUTH_CLIENT_SECRET` | yes (oauth) | — | OAuth Application Registry client_secret |
+
+## ServiceNow instance-side checklist (OAuth only)
+
+1. **Service user**: `admin` role; `sys_user.Identity Type = Human` (required — non-human identity types are rejected by the installer).
+2. **System property**: `glide.oauth.inbound.client.credential.grant_type.enabled` = `true` (type `true | false`). Create in `sys_properties` if missing. Ref: [KB1645212](https://support.servicenow.com/kb?id=kb_article_view&sysparm_article=KB1645212).
+3. **OAuth Application Registry**: System OAuth → Application Registry → New → New Inbound Integration Experience → New Integration → OAuth Client Credentials Grant.
+   - Provider Name: any manually-typed value (e.g. `ServiceNow SDK`)
+   - OAuth application user: the service user from step 1
+   - Allow access only to APIs in selected scope: **unchecked**
+   - Skip the auth-scope warning on save
+   - Do not use an OpenID Connect (OIDC) provider for this registry
+   - Resulting Client ID / Client Secret → `SN_SDK_OAUTH_CLIENT_ID` / `SN_SDK_OAUTH_CLIENT_SECRET`
+
+## GitHub repo configuration
+
+Instance URLs, per instance, as a repo **Variable** with **no default** — the pipeline fails if either is unset:
+
+```bash
+gh variable set SN_SDK_TEST_INSTANCE_URL --repo <owner>/<repo> --body "https://your-test-instance.service-now.com"
+gh variable set SN_SDK_PROD_INSTANCE_URL --repo <owner>/<repo> --body "https://your-prod-instance.service-now.com"
+```
+
+Auth-type switch, per instance, as a repo **Variable** (default: `oauth` for test, `basic` for prod):
+
+```bash
+gh variable set SN_SDK_TEST_AUTH_TYPE --repo <owner>/<repo> --body "oauth"
+gh variable set SN_SDK_PROD_AUTH_TYPE --repo <owner>/<repo> --body "basic"
+gh variable list --repo <owner>/<repo>
+```
+
+Secret names, per auth type/instance:
+
+| Auth type | Instance | Secret(s) |
+|---|---|---|
+| `basic` | test | `SN_SDK_USER_PWD` |
+| `basic` | prod | `SN_SDK_PROD_USER_PWD` |
+| `oauth` | test | `SN_SDK_TEST_OAUTH_CLIENT_ID`, `SN_SDK_TEST_OAUTH_CLIENT_SECRET` |
+| `oauth` | prod | `SN_SDK_PROD_OAUTH_CLIENT_ID`, `SN_SDK_PROD_OAUTH_CLIENT_SECRET` |
+
+```bash
+gh secret set SN_SDK_PROD_OAUTH_CLIENT_ID --repo <owner>/<repo> --body "<client-id>"
+gh secret set SN_SDK_PROD_OAUTH_CLIENT_SECRET --repo <owner>/<repo> --body "<client-secret>"
+```
+
+Don't set an instance's `*_AUTH_TYPE` Variable to `oauth` until that instance's OAuth secrets already exist — the next pipeline run against it will fail otherwise.

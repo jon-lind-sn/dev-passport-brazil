@@ -9,7 +9,7 @@ jobs:
   validate:
     uses: ./.github/workflows/_validate.yml
     with:
-      instance-url: https://yoyo.service-now.com
+      instance-url: ${{ vars.SN_SDK_TEST_INSTANCE_URL }}
       auth-type: ${{ vars.SN_SDK_TEST_AUTH_TYPE || 'oauth' }}
       alias: test
     secrets:
@@ -37,7 +37,7 @@ jobs:
         uses: ./.github/actions/sn-sdk-auth
         with:
           auth-type: ${{ vars.SN_SDK_TEST_AUTH_TYPE || 'oauth' }}
-          instance-url: https://yoyo.service-now.com
+          instance-url: ${{ vars.SN_SDK_TEST_INSTANCE_URL }}
           alias: test
           basic-password: ${{ secrets.SN_SDK_USER_PWD }}
           oauth-client-id: ${{ secrets.SN_SDK_TEST_OAUTH_CLIENT_ID }}
@@ -77,13 +77,13 @@ jobs:
         uses: ./.github/actions/sn-sdk-auth
         with:
           auth-type: ${{ vars.SN_SDK_PROD_AUTH_TYPE || 'basic' }}
-          instance-url: https://zorb.service-now.com
+          instance-url: ${{ vars.SN_SDK_PROD_INSTANCE_URL }}
           alias: prod
           basic-password: ${{ secrets.SN_SDK_PROD_USER_PWD }}
           oauth-client-id: ${{ secrets.SN_SDK_PROD_OAUTH_CLIENT_ID }}
           oauth-client-secret: ${{ secrets.SN_SDK_PROD_OAUTH_CLIENT_SECRET }}
 
-      - name: Install published app on zorb
+      - name: Install published app to prod instance
         run: |
           npx @servicenow/sdk cicd install \
             ${{ steps.auth.outputs.cicd-auth-flag }} \
