@@ -42,16 +42,19 @@ Check current values:
 gh variable list --repo jon-lind-sn/dev-passport-brazil
 ```
 
-Each mode reads its credentials from existing repo secrets/variables —
-nothing to add unless you're turning on a mode for an instance that doesn't
-have it yet:
+**Variables**
 
-| Auth type | Instance | Secret(s)/Variable(s) |
-|---|---|---|
-| `basic` | test | `SN_SDK_TEST_USER` (Variable), `SN_SDK_USER_PWD` (secret) |
-| `basic` | prod | `SN_SDK_PROD_USER` (Variable), `SN_SDK_PROD_USER_PWD` (secret) |
-| `oauth` | test | `SN_SDK_TEST_OAUTH_CLIENT_ID`, `SN_SDK_TEST_OAUTH_CLIENT_SECRET` (secrets) |
-| `oauth` | prod | `SN_SDK_PROD_OAUTH_CLIENT_ID`, `SN_SDK_PROD_OAUTH_CLIENT_SECRET` (secrets) |
+| Auth type | Variable(s) |
+|---|---|
+| — | `SN_SDK_TEST_INSTANCE_URL`, `SN_SDK_PROD_INSTANCE_URL`, `SN_SDK_TEST_AUTH_TYPE`, `SN_SDK_PROD_AUTH_TYPE` |
+| `basic` | `SN_SDK_TEST_USER`, `SN_SDK_PROD_USER` |
+
+**Secrets**
+
+| Auth type | Secret(s) |
+|---|---|
+| `basic` | `SN_SDK_TEST_USER_PWD`, `SN_SDK_PROD_USER_PWD` |
+| `oauth` | `SN_SDK_TEST_OAUTH_CLIENT_ID`, `SN_SDK_TEST_OAUTH_CLIENT_SECRET`, `SN_SDK_PROD_OAUTH_CLIENT_ID`, `SN_SDK_PROD_OAUTH_CLIENT_SECRET` |
 
 To add/rotate a secret:
 

@@ -120,14 +120,21 @@ Check current values:
 gh variable list --repo <owner>/<repo>
 ```
 
-**3. Set the credentials matching each auth type:**
+**3. Set the credentials matching each auth type.**
 
-| Auth type | Instance | Variable(s) | Secret(s) |
-|---|---|---|---|
-| `basic` | test | `SN_SDK_TEST_USER` | `SN_SDK_USER_PWD` |
-| `basic` | prod | `SN_SDK_PROD_USER` | `SN_SDK_PROD_USER_PWD` |
-| `oauth` | test | — | `SN_SDK_TEST_OAUTH_CLIENT_ID`, `SN_SDK_TEST_OAUTH_CLIENT_SECRET` |
-| `oauth` | prod | — | `SN_SDK_PROD_OAUTH_CLIENT_ID`, `SN_SDK_PROD_OAUTH_CLIENT_SECRET` |
+Variables:
+
+| Auth type | Variable(s) |
+|---|---|
+| — | `SN_SDK_TEST_INSTANCE_URL`, `SN_SDK_PROD_INSTANCE_URL`, `SN_SDK_TEST_AUTH_TYPE`, `SN_SDK_PROD_AUTH_TYPE` |
+| `basic` | `SN_SDK_TEST_USER`, `SN_SDK_PROD_USER` |
+
+Secrets:
+
+| Auth type | Secret(s) |
+|---|---|
+| `basic` | `SN_SDK_TEST_USER_PWD`, `SN_SDK_PROD_USER_PWD` |
+| `oauth` | `SN_SDK_TEST_OAUTH_CLIENT_ID`, `SN_SDK_TEST_OAUTH_CLIENT_SECRET`, `SN_SDK_PROD_OAUTH_CLIENT_ID`, `SN_SDK_PROD_OAUTH_CLIENT_SECRET` |
 
 For Basic auth, set the username as a Variable and the password as a secret:
 

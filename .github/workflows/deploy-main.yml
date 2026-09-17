@@ -14,7 +14,7 @@ jobs:
       alias: test
       basic-username: ${{ vars.SN_SDK_TEST_USER }}
     secrets:
-      basic-password: ${{ secrets.SN_SDK_USER_PWD }}
+      basic-password: ${{ secrets.SN_SDK_TEST_USER_PWD }}
       oauth-client-id: ${{ secrets.SN_SDK_TEST_OAUTH_CLIENT_ID }}
       oauth-client-secret: ${{ secrets.SN_SDK_TEST_OAUTH_CLIENT_SECRET }}
 
@@ -41,7 +41,7 @@ jobs:
           instance-url: ${{ vars.SN_SDK_TEST_INSTANCE_URL }}
           alias: test
           basic-username: ${{ vars.SN_SDK_TEST_USER }}
-          basic-password: ${{ secrets.SN_SDK_USER_PWD }}
+          basic-password: ${{ secrets.SN_SDK_TEST_USER_PWD }}
           oauth-client-id: ${{ secrets.SN_SDK_TEST_OAUTH_CLIENT_ID }}
           oauth-client-secret: ${{ secrets.SN_SDK_TEST_OAUTH_CLIENT_SECRET }}
 
