@@ -10,8 +10,9 @@ jobs:
     uses: ./.github/workflows/_validate.yml
     with:
       instance-url: ${{ vars.SN_SDK_TEST_INSTANCE_URL }}
-      auth-type: ${{ vars.SN_SDK_TEST_AUTH_TYPE || 'oauth' }}
+      auth-type: ${{ vars.SN_SDK_TEST_AUTH_TYPE }}
       alias: test
+      basic-username: ${{ vars.SN_SDK_TEST_USER }}
     secrets:
       basic-password: ${{ secrets.SN_SDK_USER_PWD }}
       oauth-client-id: ${{ secrets.SN_SDK_TEST_OAUTH_CLIENT_ID }}

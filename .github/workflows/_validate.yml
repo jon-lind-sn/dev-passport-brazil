@@ -12,6 +12,9 @@ on:
       alias:
         required: true
         type: string
+      basic-username:
+        required: false
+        type: string
     secrets:
       basic-password:
         required: false
@@ -45,6 +48,7 @@ jobs:
           auth-type: ${{ inputs.auth-type }}
           instance-url: ${{ inputs.instance-url }}
           alias: ${{ inputs.alias }}
+          basic-username: ${{ inputs.basic-username }}
           basic-password: ${{ secrets.basic-password }}
           oauth-client-id: ${{ secrets.oauth-client-id }}
           oauth-client-secret: ${{ secrets.oauth-client-secret }}
@@ -74,6 +78,7 @@ jobs:
           auth-type: ${{ inputs.auth-type }}
           instance-url: ${{ inputs.instance-url }}
           alias: ${{ inputs.alias }}
+          basic-username: ${{ inputs.basic-username }}
           basic-password: ${{ secrets.basic-password }}
           oauth-client-id: ${{ secrets.oauth-client-id }}
           oauth-client-secret: ${{ secrets.oauth-client-secret }}

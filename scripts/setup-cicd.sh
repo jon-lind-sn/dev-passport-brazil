@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 # Interactive setup for this repo's CI/CD: sets the test/prod instance URLs,
 # picks basic or oauth per instance, prompts for the needed credentials, and
-# pushes all of it as GitHub repo variables/secrets via `gh`. The basic-auth
-# username is hardcoded in the workflow files (by design) — this script
-# reminds you where to edit it but doesn't touch it. See SETUP.md /
+# pushes all of it as GitHub repo variables/secrets via `gh`. See SETUP.md /
 # TUTORIAL.md for the manual equivalent of everything this script does.
 set -euo pipefail
 
@@ -110,14 +108,14 @@ CURRENT_TEST_AUTH="$(gh variable get SN_SDK_TEST_AUTH_TYPE --repo "$REPO_SLUG" 2
 CURRENT_PROD_AUTH="$(gh variable get SN_SDK_PROD_AUTH_TYPE --repo "$REPO_SLUG" 2>/dev/null || true)"
 CURRENT_TEST_URL="$(gh variable get SN_SDK_TEST_INSTANCE_URL --repo "$REPO_SLUG" 2>/dev/null || true)"
 CURRENT_PROD_URL="$(gh variable get SN_SDK_PROD_INSTANCE_URL --repo "$REPO_SLUG" 2>/dev/null || true)"
+CURRENT_TEST_USER="$(gh variable get SN_SDK_TEST_USER --repo "$REPO_SLUG" 2>/dev/null || true)"
+CURRENT_PROD_USER="$(gh variable get SN_SDK_PROD_USER --repo "$REPO_SLUG" 2>/dev/null || true)"
 
 echo "Configuring CI/CD auth for $REPO_SLUG"
 echo "Test = the instance _validate.yml installs to on every PR/push. Prod = the instance install-prod deploys to after approval."
 echo "New here and just want it running? basic auth for both test and prod is the least setup (no ServiceNow OAuth app registry needed)."
 echo
 echo "Press Enter on any prompt to keep its current/default value shown in [brackets]."
-
-BASIC_USERNAME=""
 
 # Everything for one instance lives together under its own header, in the
 # order you're actually asked for it: auth type, then URL, then credentials.
@@ -126,8 +124,8 @@ echo "== Configure Test instance =="
 [ -n "$TEST_AUTH" ] || TEST_AUTH="$(ask_auth_type "  Auth type" "${CURRENT_TEST_AUTH:-basic}")"
 TEST_URL="$(ask_required "  Instance URL" "$CURRENT_TEST_URL")"
 if [ "$TEST_AUTH" = "basic" ]; then
-  [ -n "$BASIC_USERNAME" ] || BASIC_USERNAME="$(ask "  Basic-auth username (shared with prod; hardcoded default in .github/actions/sn-sdk-auth/action.yml)" "jon.lind")"
-  TEST_PWD="$(ask_secret "  Password for $BASIC_USERNAME on $TEST_URL (leave blank to keep the existing secret)")"
+  TEST_USER="$(ask_required "  Basic-auth username on $TEST_URL" "$CURRENT_TEST_USER")"
+  TEST_PWD="$(ask_secret "  Password for $TEST_USER on $TEST_URL (leave blank to keep the existing secret)")"
   set_secret_if_provided SN_SDK_USER_PWD "$TEST_PWD"
 else
   echo "  Get these from the OAuth Application Registry on $TEST_URL (see TUTORIAL.md 'ServiceNow-instance-side setup' if you haven't created one yet). Leave blank to keep an existing secret."
@@ -143,8 +141,8 @@ echo "== Configure Prod instance =="
 [ -n "$PROD_AUTH" ] || PROD_AUTH="$(ask_auth_type "  Auth type" "${CURRENT_PROD_AUTH:-basic}")"
 PROD_URL="$(ask_required "  Instance URL" "$CURRENT_PROD_URL")"
 if [ "$PROD_AUTH" = "basic" ]; then
-  [ -n "$BASIC_USERNAME" ] || BASIC_USERNAME="$(ask "  Basic-auth username (shared with test; hardcoded default in .github/actions/sn-sdk-auth/action.yml)" "jon.lind")"
-  PROD_PWD="$(ask_secret "  Password for $BASIC_USERNAME on $PROD_URL (leave blank to keep the existing secret)")"
+  PROD_USER="$(ask_required "  Basic-auth username on $PROD_URL" "$CURRENT_PROD_USER")"
+  PROD_PWD="$(ask_secret "  Password for $PROD_USER on $PROD_URL (leave blank to keep the existing secret)")"
   set_secret_if_provided SN_SDK_PROD_USER_PWD "$PROD_PWD"
 else
   echo "  Get these from the OAuth Application Registry on $PROD_URL (see TUTORIAL.md 'ServiceNow-instance-side setup' if you haven't created one yet). Leave blank to keep an existing secret."
@@ -161,6 +159,8 @@ set_variable_if_changed SN_SDK_TEST_INSTANCE_URL "$TEST_URL"
 set_variable_if_changed SN_SDK_PROD_INSTANCE_URL "$PROD_URL"
 set_variable_if_changed SN_SDK_TEST_AUTH_TYPE "$TEST_AUTH"
 set_variable_if_changed SN_SDK_PROD_AUTH_TYPE "$PROD_AUTH"
+[ "$TEST_AUTH" = "basic" ] && set_variable_if_changed SN_SDK_TEST_USER "$TEST_USER"
+[ "$PROD_AUTH" = "basic" ] && set_variable_if_changed SN_SDK_PROD_USER "$PROD_USER"
 
 echo
 echo "Done. Test = $TEST_AUTH ($TEST_URL), Prod = $PROD_AUTH ($PROD_URL)."

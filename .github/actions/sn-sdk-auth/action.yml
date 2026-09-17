@@ -12,7 +12,6 @@ inputs:
     required: true
   basic-username:
     required: false
-    default: jon.lind
   basic-password:
     required: false
   oauth-client-id:
@@ -28,6 +27,24 @@ outputs:
 runs:
   using: composite
   steps:
+    - name: Validate auth-type and required credentials
+      shell: bash
+      run: |
+        case "${{ inputs.auth-type }}" in
+          basic)
+            [ -n "${{ inputs.basic-username }}" ] || { echo "::error::auth-type is 'basic' but basic-username is empty. Set the SN_SDK_TEST_USER/SN_SDK_PROD_USER repo Variable." >&2; exit 1; }
+            [ -n "${{ inputs.basic-password }}" ] || { echo "::error::auth-type is 'basic' but basic-password is empty. Set the matching repo secret." >&2; exit 1; }
+            ;;
+          oauth)
+            [ -n "${{ inputs.oauth-client-id }}" ] || { echo "::error::auth-type is 'oauth' but oauth-client-id is empty. Set the matching repo secret." >&2; exit 1; }
+            [ -n "${{ inputs.oauth-client-secret }}" ] || { echo "::error::auth-type is 'oauth' but oauth-client-secret is empty. Set the matching repo secret." >&2; exit 1; }
+            ;;
+          *)
+            echo "::error::auth-type must be 'basic' or 'oauth', got '${{ inputs.auth-type }}'. Set the SN_SDK_TEST_AUTH_TYPE/SN_SDK_PROD_AUTH_TYPE repo Variable explicitly — there is no default." >&2
+            exit 1
+            ;;
+        esac
+
     - name: Export common env
       shell: bash
       run: |

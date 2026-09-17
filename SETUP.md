@@ -9,7 +9,7 @@ For the GitHub-side half of this (instance URLs, auth-type variables, and secret
 | Variable | Required | basic | oauth |
 |---|---|---|---|
 | `SN_SDK_NODE_ENV` | yes | `SN_SDK_CI_INSTALL` | `SN_SDK_CI_INSTALL` |
-| `SN_SDK_AUTH_TYPE` | oauth: yes, basic: no (default) | `basic` or unset | `oauth` |
+| `SN_SDK_AUTH_TYPE` | yes | `basic` | `oauth` |
 | `SN_SDK_INSTANCE_URL` | yes | full instance URL | full instance URL |
 | `SN_SDK_USER` | yes (basic) | username | — |
 | `SN_SDK_USER_PWD` | yes (basic) | password | — |
@@ -33,7 +33,7 @@ For the GitHub-side half of this (instance URLs, auth-type variables, and secret
 ```bash
 SN_SDK_NODE_ENV=SN_SDK_CI_INSTALL SN_SDK_AUTH_TYPE=oauth \
 SN_SDK_INSTANCE_URL=https://your-instance.service-now.com \
-SN_SDK_OAUTH_CLIENT_ID=<client-id> SN_SDK_OAUTH_CLIENT_SECRET=<client-secret> \
+SN_SDK_OAUTH_CLIENT_ID=<client-id> SN_SDK_OAUTH_CLIENT_SECRET='<client-secret>' \
 npx @servicenow/sdk query sys_user -q "active=true" --limit 1 -o json
 ```
 
@@ -45,21 +45,21 @@ Alternative (token-endpoint only, no `now-sdk`/Node required):
 curl -s -X POST "https://your-instance.service-now.com/oauth_token.do" \
   -d grant_type=client_credentials \
   -d client_id="<client-id>" \
-  -d client_secret="<client-secret>"
+  -d client_secret='<client-secret>'
 ```
 
 Success → `{"access_token":"...", ...}`. Failure → `{"error":"invalid_client", ...}` (bad credentials, registry still scope-restricted, or the system property from step 2 not `true`).
 
 ## GitHub repo configuration
 
-Instance URLs, per instance, as a repo **Variable** with **no default** — the pipeline fails if either is unset:
+Instance URLs, per instance, as a repo **Variable**:
 
 ```bash
 gh variable set SN_SDK_TEST_INSTANCE_URL --repo <owner>/<repo> --body "https://your-test-instance.service-now.com"
 gh variable set SN_SDK_PROD_INSTANCE_URL --repo <owner>/<repo> --body "https://your-prod-instance.service-now.com"
 ```
 
-Auth-type switch, per instance, as a repo **Variable** (default: `oauth` for test, `basic` for prod):
+Auth-type switch, per instance, as a repo **Variable**:
 
 ```bash
 gh variable set SN_SDK_TEST_AUTH_TYPE --repo <owner>/<repo> --body "oauth"
@@ -67,18 +67,20 @@ gh variable set SN_SDK_PROD_AUTH_TYPE --repo <owner>/<repo> --body "basic"
 gh variable list --repo <owner>/<repo>
 ```
 
-Secret names, per auth type/instance:
+Credential names, per auth type/instance:
 
-| Auth type | Instance | Secret(s) |
-|---|---|---|
-| `basic` | test | `SN_SDK_USER_PWD` |
-| `basic` | prod | `SN_SDK_PROD_USER_PWD` |
-| `oauth` | test | `SN_SDK_TEST_OAUTH_CLIENT_ID`, `SN_SDK_TEST_OAUTH_CLIENT_SECRET` |
-| `oauth` | prod | `SN_SDK_PROD_OAUTH_CLIENT_ID`, `SN_SDK_PROD_OAUTH_CLIENT_SECRET` |
+| Auth type | Instance | Variable(s) | Secret(s) |
+|---|---|---|---|
+| `basic` | test | `SN_SDK_TEST_USER` | `SN_SDK_USER_PWD` |
+| `basic` | prod | `SN_SDK_PROD_USER` | `SN_SDK_PROD_USER_PWD` |
+| `oauth` | test | — | `SN_SDK_TEST_OAUTH_CLIENT_ID`, `SN_SDK_TEST_OAUTH_CLIENT_SECRET` |
+| `oauth` | prod | — | `SN_SDK_PROD_OAUTH_CLIENT_ID`, `SN_SDK_PROD_OAUTH_CLIENT_SECRET` |
 
 ```bash
+gh variable set SN_SDK_PROD_USER --repo <owner>/<repo> --body "<username>"
+gh secret set SN_SDK_PROD_USER_PWD --repo <owner>/<repo> --body '<password>'
 gh secret set SN_SDK_PROD_OAUTH_CLIENT_ID --repo <owner>/<repo> --body "<client-id>"
-gh secret set SN_SDK_PROD_OAUTH_CLIENT_SECRET --repo <owner>/<repo> --body "<client-secret>"
+gh secret set SN_SDK_PROD_OAUTH_CLIENT_SECRET --repo <owner>/<repo> --body '<client-secret>'
 ```
 
-Don't set an instance's `*_AUTH_TYPE` Variable to `oauth` until that instance's OAuth secrets already exist — the next pipeline run against it will fail otherwise.
+Set the matching credentials for an instance before setting its `*_AUTH_TYPE` Variable.
