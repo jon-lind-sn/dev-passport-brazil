@@ -4,11 +4,11 @@ A ServiceNow application built with the [ServiceNow SDK](https://www.npmjs.com/p
 
 ## Using this against your own instances
 
-This repo has no working defaults baked in — three things are required repo Variables/secrets with no fallback, so the pipeline fails until all of them are set:
+Set these three things:
 
 1. **Instance URLs** — `SN_SDK_TEST_INSTANCE_URL`, `SN_SDK_PROD_INSTANCE_URL` (repo Variables).
 2. **Auth type per instance** — `SN_SDK_TEST_AUTH_TYPE`, `SN_SDK_PROD_AUTH_TYPE` (repo Variables), `basic` or `oauth`, set independently for test and prod.
-3. **Credentials matching that auth type** — a repo secret (password, or OAuth client ID/secret).
+3. **Credentials matching that auth type** — `basic`: username (Variable) and password (secret); `oauth`: client ID and secret (both secrets).
 
 If you're new here and just want it running with the least setup, use **basic auth for both test and prod** — it needs an existing instance user's username/password, not an OAuth app registration. OAuth is worth the extra setup once you move past quick iteration (see "Configuring auth" below for why).
 
@@ -42,11 +42,25 @@ gh variable set SN_SDK_TEST_AUTH_TYPE --repo <owner>/<repo> --body "oauth"
 gh variable set SN_SDK_PROD_AUTH_TYPE --repo <owner>/<repo> --body "basic"
 ```
 
-Each auth type reads its credentials from a fixed set of repo secrets (`SN_SDK_USER_PWD` for Basic, `SN_SDK_*_OAUTH_CLIENT_ID`/`_SECRET` for OAuth) — see [`.github/workflows/README.md`](.github/workflows/README.md) for the full switch mechanics, the secrets table, and the exact `gh` commands to set them.
+**Variables**
+
+| Auth type | Variable(s) |
+|---|---|
+| — | `SN_SDK_TEST_INSTANCE_URL`, `SN_SDK_PROD_INSTANCE_URL`, `SN_SDK_TEST_AUTH_TYPE`, `SN_SDK_PROD_AUTH_TYPE` |
+| `basic` | `SN_SDK_TEST_USER`, `SN_SDK_PROD_USER` |
+
+**Secrets**
+
+| Auth type | Secret(s) |
+|---|---|
+| `basic` | `SN_SDK_TEST_USER_PWD`, `SN_SDK_PROD_USER_PWD` |
+| `oauth` | `SN_SDK_TEST_OAUTH_CLIENT_ID`, `SN_SDK_TEST_OAUTH_CLIENT_SECRET`, `SN_SDK_PROD_OAUTH_CLIENT_ID`, `SN_SDK_PROD_OAUTH_CLIENT_SECRET` |
+
+See [`.github/workflows/README.md`](.github/workflows/README.md) for the full switch mechanics and the exact `gh` commands to set them.
 
 Setting up OAuth also requires a one-time setup on the ServiceNow instance itself (a service user, a system property, and an OAuth Application Registry) — see https://servicenow.github.io/sdk/config/ci-integration#authentication-for-now-sdk-install, or run `now-sdk explain ci-integration`.
 
-For the full walkthrough covering both the instance-side and GitHub-side setup end to end, see [TUTORIAL.md](TUTORIAL.md).
+For the full walkthrough covering both the instance-side and GitHub-side setup end to end, see [TUTORIAL.md](TUTORIAL.md), watch the [tutorial video](https://youtu.be/rcdtlJah-F4), or follow the [tutorial on community](https://sn.works/sdk/cicd).
 
 ### Versioning matters here
 

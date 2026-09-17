@@ -10,10 +10,11 @@ jobs:
     uses: ./.github/workflows/_validate.yml
     with:
       instance-url: ${{ vars.SN_SDK_TEST_INSTANCE_URL }}
-      auth-type: ${{ vars.SN_SDK_TEST_AUTH_TYPE || 'oauth' }}
+      auth-type: ${{ vars.SN_SDK_TEST_AUTH_TYPE }}
       alias: test
+      basic-username: ${{ vars.SN_SDK_TEST_USER }}
     secrets:
-      basic-password: ${{ secrets.SN_SDK_USER_PWD }}
+      basic-password: ${{ secrets.SN_SDK_TEST_USER_PWD }}
       oauth-client-id: ${{ secrets.SN_SDK_TEST_OAUTH_CLIENT_ID }}
       oauth-client-secret: ${{ secrets.SN_SDK_TEST_OAUTH_CLIENT_SECRET }}
 
@@ -36,10 +37,11 @@ jobs:
         id: auth
         uses: ./.github/actions/sn-sdk-auth
         with:
-          auth-type: ${{ vars.SN_SDK_TEST_AUTH_TYPE || 'oauth' }}
+          auth-type: ${{ vars.SN_SDK_TEST_AUTH_TYPE }}
           instance-url: ${{ vars.SN_SDK_TEST_INSTANCE_URL }}
           alias: test
-          basic-password: ${{ secrets.SN_SDK_USER_PWD }}
+          basic-username: ${{ vars.SN_SDK_TEST_USER }}
+          basic-password: ${{ secrets.SN_SDK_TEST_USER_PWD }}
           oauth-client-id: ${{ secrets.SN_SDK_TEST_OAUTH_CLIENT_ID }}
           oauth-client-secret: ${{ secrets.SN_SDK_TEST_OAUTH_CLIENT_SECRET }}
 
@@ -76,9 +78,10 @@ jobs:
         id: auth
         uses: ./.github/actions/sn-sdk-auth
         with:
-          auth-type: ${{ vars.SN_SDK_PROD_AUTH_TYPE || 'basic' }}
+          auth-type: ${{ vars.SN_SDK_PROD_AUTH_TYPE }}
           instance-url: ${{ vars.SN_SDK_PROD_INSTANCE_URL }}
           alias: prod
+          basic-username: ${{ vars.SN_SDK_PROD_USER }}
           basic-password: ${{ secrets.SN_SDK_PROD_USER_PWD }}
           oauth-client-id: ${{ secrets.SN_SDK_PROD_OAUTH_CLIENT_ID }}
           oauth-client-secret: ${{ secrets.SN_SDK_PROD_OAUTH_CLIENT_SECRET }}

@@ -16,13 +16,8 @@ secret), read by `pr-validation.yml`/`deploy-main.yml` and passed down to
 - `SN_SDK_TEST_AUTH_TYPE` → `oauth` or `basic`, controls the test instance
 - `SN_SDK_PROD_AUTH_TYPE` → `oauth` or `basic`, controls the prod instance
 
-If a variable is unset, `pr-validation.yml`/`deploy-main.yml` default it to
-`oauth` for test and `basic` for prod.
-
 The instance URLs are also repo Variables — `SN_SDK_TEST_INSTANCE_URL` and
-`SN_SDK_PROD_INSTANCE_URL`. Unlike the auth-type switches, these have **no
-default** — if unset, the workflow passes an empty instance URL and the run
-fails. Both must be set before the pipeline will run at all.
+`SN_SDK_PROD_INSTANCE_URL`.
 
 For each run, `sn-sdk-auth` uses the resolved auth type to export the right
 `SN_SDK_*` env vars for the plain `install` step, and — for `basic` only —
@@ -47,22 +42,25 @@ Check current values:
 gh variable list --repo jon-lind-sn/dev-passport-brazil
 ```
 
-Each mode reads its credentials from existing repo secrets — nothing to add
-unless you're turning on OAuth for an instance that doesn't have it yet:
+**Variables**
 
-| Auth type | Instance | Secret(s) |
-|---|---|---|
-| `basic` | test | `SN_SDK_USER_PWD` |
-| `basic` | prod | `SN_SDK_PROD_USER_PWD` |
-| `oauth` | test | `SN_SDK_TEST_OAUTH_CLIENT_ID`, `SN_SDK_TEST_OAUTH_CLIENT_SECRET` |
-| `oauth` | prod | `SN_SDK_PROD_OAUTH_CLIENT_ID`, `SN_SDK_PROD_OAUTH_CLIENT_SECRET` |
+| Auth type | Variable(s) |
+|---|---|
+| — | `SN_SDK_TEST_INSTANCE_URL`, `SN_SDK_PROD_INSTANCE_URL`, `SN_SDK_TEST_AUTH_TYPE`, `SN_SDK_PROD_AUTH_TYPE` |
+| `basic` | `SN_SDK_TEST_USER`, `SN_SDK_PROD_USER` |
+
+**Secrets**
+
+| Auth type | Secret(s) |
+|---|---|
+| `basic` | `SN_SDK_TEST_USER_PWD`, `SN_SDK_PROD_USER_PWD` |
+| `oauth` | `SN_SDK_TEST_OAUTH_CLIENT_ID`, `SN_SDK_TEST_OAUTH_CLIENT_SECRET`, `SN_SDK_PROD_OAUTH_CLIENT_ID`, `SN_SDK_PROD_OAUTH_CLIENT_SECRET` |
 
 To add/rotate a secret:
 
 ```bash
 gh secret set SN_SDK_PROD_OAUTH_CLIENT_ID --repo jon-lind-sn/dev-passport-brazil --body "<client-id>"
-gh secret set SN_SDK_PROD_OAUTH_CLIENT_SECRET --repo jon-lind-sn/dev-passport-brazil --body "<client-secret>"
+gh secret set SN_SDK_PROD_OAUTH_CLIENT_SECRET --repo jon-lind-sn/dev-passport-brazil --body '<client-secret>'
 ```
 
-Prod OAuth secrets don't exist yet — don't set `SN_SDK_PROD_AUTH_TYPE=oauth`
-until they're created.
+Create the prod OAuth secrets before setting `SN_SDK_PROD_AUTH_TYPE=oauth`.
