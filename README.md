@@ -6,11 +6,11 @@ This project demonstrates how to setup a Continuous Integration/Continuous Deplo
 
 > **⚠️ Caution:** Setting up this pipeline means creating automations with CI/CD credentials, service users and OAuth applications. These can write directly to your ServiceNow instances without a human in the loop so it is your responsibility to configure and use these carefully, keep secrets out of version control, and understand exactly what each workflow will do to your instance before you run it.  Always start by testing in sub-prod instances.
 
-## Quick start
-
 ### Note on the number of instances and PDIs
 
 You can run this with one or two instances.  There are two workflows: one to deploy to a test instance and run ATF tests, and a second prod deployment workflow that relies on App Repo.  PDI users cannot use the prod flow due to App Repo limitations, but the first one should work fine.
+
+## Quick start
 
 > NOTE: OAuth is the preferred technique, and really isn't much more difficult than basic auth to configure. It just requires adding a single OAuth Application record to the registry on each instance.  Please view the [tutorial on community](https://sn.works/sdk/cicd) or [here](TUTORIAL.md) to set that up before continuing.
 
