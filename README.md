@@ -1,14 +1,16 @@
-# Dev Passport Brazil
+# Dev Passport Brazil: CI/CD using Now-SDK
 
 Find a [tutorial and video on community](https://sn.works/sdk/cicd).
 
-A ServiceNow application built with the [ServiceNow SDK](https://www.npmjs.com/package/@servicenow/sdk) ("Fluent").
+This project demonstrates how to setup a Continuous Integration/Continuous Deployment pipeline using the [ServiceNow SDK](https://www.npmjs.com/package/@servicenow/sdk)'s new [Continuous Integration feature](https://servicenow.github.io/sdk/config/ci-integration).  **Now-SDK Version 4.12.0+ is suggested.**
 
 > **⚠️ Caution:** Setting up this pipeline means creating automations with CI/CD credentials, service users and OAuth applications. These can write directly to your ServiceNow instances without a human in the loop so it is your responsibility to configure and use these carefully, keep secrets out of version control, and understand exactly what each workflow will do to your instance before you run it.  Always start by testing in sub-prod instances.
 
-### Quick start
+## Quick start
 
-NOTE: You can run this with one or two instances.  There are two workflows: one to deploy to a test instance and run ATF tests, and a second workflow to add the version to App Repo and deploy to prod.  PDI users cannot use the prod flow due to App Repo limitations, but the first one should work fine.
+### Note on the number of instances and PDIs
+
+You can run this with one or two instances.  There are two workflows: one to deploy to a test instance and run ATF tests, and a second prod deployment workflow that relies on App Repo.  PDI users cannot use the prod flow due to App Repo limitations, but the first one should work fine.
 
 > NOTE: OAuth is the preferred technique, and really isn't much more difficult than basic auth to configure. It just requires adding a single OAuth Application record to the registry on each instance.  Please view the [tutorial on community](https://sn.works/sdk/cicd) or [here](TUTORIAL.md) to set that up before continuing.
 
@@ -59,10 +61,6 @@ For the full walkthrough covering both the instance-side OAuth and GitHub-side s
 ### Versioning matters here
 
 If you are going to use the second prod deployment flow it relies on the Application Repository in which versions count. Be sure to increment the `version` field in `package.json` when you are ready to push and create a PR. A local git hook enforces this automatically before you can push (see the appendix on Husky).
-
-### Note on testing with a Personal Developer Instance (PDI)
-
-You may test this in a PDI for everything except the `publish` feature in the prod deployment flow, as that requires App Repo.  As such you will be able to build, deploy and ATF test this sample with any two instances (the PR workflow), but if you wish to publish to App Repo and deploy you will need an environment with access to App Repo.
 
 ### Making a change
 
