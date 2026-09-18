@@ -12,7 +12,7 @@ Set these three things:
 
 If you're new here and just want it running with the least setup, use **basic auth for both test and prod** — it needs an existing instance user's username/password, not an OAuth app registration. OAuth is worth the extra setup once you move past quick iteration (see "Configuring auth" below for why).
 
-Run `./scripts/setup-cicd.sh` to configure all three interactively — tell it the instance URLs and auth type for each instance, and it prompts for the right credentials and pushes everything with `gh`.
+Run `./scripts/setup-cicd.sh` or `scripts\setup-cicd.bat` to configure all three interactively — tell it the instance URLs and auth type for each instance, and it prompts for the right credentials and pushes everything with `gh`.
 
 ## How this repo's pipeline works
 

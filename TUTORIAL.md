@@ -6,6 +6,12 @@ Set up this repo's CI/CD pipeline against your own ServiceNow instances, using e
 
 If you just need the "what do I have to configure" checklist, see [README.md](README.md). If you want a dense reference to hand to an AI coding assistant, see [SETUP.md](SETUP.md).
 
+## Step 0: Get the code
+
+Forking is the easiest way to get your own copy of this repo: log into GitHub, open [jon-lind-sn/dev-passport-brazil](https://github.com/jon-lind-sn/dev-passport-brazil), and click **Fork**.
+
+If you'd rather add this pipeline to an existing project, clone this repo (`git clone https://github.com/jon-lind-sn/dev-passport-brazil.git`), then copy the `.github` and `scripts` folders into your project and reconcile the `package.json` dependencies it expects.
+
 ## What this pipeline does
 
 1. [`.github/workflows/pr-validation.yml`](.github/workflows/pr-validation.yml) runs on every pull request against `main` and on every subsequent push to that PR's branch. It calls the reusable workflow [`.github/workflows/_validate.yml`](.github/workflows/_validate.yml), which:
@@ -49,7 +55,7 @@ Verify or create the system property `glide.oauth.inbound.client.credential.gran
 
 1. Navigate to **System OAuth → Application Registry → New Inbound Integration Experience → New Integration → OAuth Client Credentials Grant**.
 2. Set **Name** to a descriptive value, e.g. "SDK CI".
-3. Set **Provider Name** to `ServiceNow SDK` (type this in manually).
+3. Set **Provider Name** to `SDK CI Provider` (type this in manually).
 4. Set **OAuth application user** to the service user from step 1.
 5. Leave **Allow access only to APIs in selected scope** unchecked.
 6. Do not select an OpenID Connect (OIDC) provider for this registry — OIDC providers don't issue tokens for the `client_credentials` grant.
@@ -152,7 +158,7 @@ gh secret set SN_SDK_PROD_OAUTH_CLIENT_SECRET --repo <owner>/<repo> --body '<cli
 
 Swap in the `TEST` names for the test instance.
 
-**Alternative:** run `./scripts/setup-cicd.sh` from the repo root instead of the steps above. It prompts for each instance's URL, auth type, and matching credentials, and pushes them with `gh`. Re-running it later leaves any secret you leave blank untouched. This is a bash script — on Windows, run it from Git Bash or WSL, not PowerShell or Command Prompt.
+**Alternative:** run `./scripts/setup-cicd.sh` or `scripts\setup-cicd.bat` from the repo root instead of the steps above. It prompts for each instance's URL, auth type, and matching credentials, and pushes them with `gh`. Re-running it later leaves any secret you leave blank untouched.
 
 ## Step 3: Making a change and watching the pipeline run
 

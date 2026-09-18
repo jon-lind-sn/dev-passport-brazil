@@ -126,7 +126,7 @@ TEST_URL="$(ask_required "  Instance URL" "$CURRENT_TEST_URL")"
 if [ "$TEST_AUTH" = "basic" ]; then
   TEST_USER="$(ask_required "  Basic-auth username on $TEST_URL" "$CURRENT_TEST_USER")"
   TEST_PWD="$(ask_secret "  Password for $TEST_USER on $TEST_URL (leave blank to keep the existing secret)")"
-  set_secret_if_provided SN_SDK_USER_PWD "$TEST_PWD"
+  set_secret_if_provided SN_SDK_TEST_USER_PWD "$TEST_PWD"
 else
   echo "  Get these from the OAuth Application Registry on $TEST_URL (see TUTORIAL.md 'ServiceNow-instance-side setup' if you haven't created one yet). Leave blank to keep an existing secret."
   echo "  Tip: validate a credential first — SN_SDK_NODE_ENV=SN_SDK_CI_INSTALL SN_SDK_AUTH_TYPE=oauth SN_SDK_INSTANCE_URL=$TEST_URL SN_SDK_OAUTH_CLIENT_ID=... SN_SDK_OAUTH_CLIENT_SECRET=... npx @servicenow/sdk query sys_user -q active=true --limit 1 -o json (see TUTORIAL.md)."
