@@ -6,17 +6,18 @@ A ServiceNow application built with the [ServiceNow SDK](https://www.npmjs.com/p
 
 > **⚠️ Caution:** Setting up this pipeline means creating automations with CI/CD credentials, service users and OAuth applications. These can write directly to your ServiceNow instances without a human in the loop so it is your responsibility to configure and use these carefully, keep secrets out of version control, and understand exactly what each workflow will do to your instance before you run it.  Always start by testing in sub-prod instances.
 
-## Using this against your own instances
+### Quick start
 
-Set these three things:
+NOTE: You can run this with one or two instances.  There are two workflows: one to deploy to a test instance and run ATF tests, and a second workflow to add the version to App Repo and deploy to prod.  PDI users cannot use the prod flow due to App Repo limitations, but the first one should work fine.
 
-1. **Instance URLs** — `SN_SDK_TEST_INSTANCE_URL`, `SN_SDK_PROD_INSTANCE_URL` (repo Variables).
-2. **Auth type per instance** — `SN_SDK_TEST_AUTH_TYPE`, `SN_SDK_PROD_AUTH_TYPE` (repo Variables), `basic` or `oauth`, set independently for test and prod.
-3. **Credentials matching that auth type** — `basic`: username (Variable) and password (secret); `oauth`: client ID and secret (both secrets).
+> NOTE: OAuth is the preferred technique, and really isn't much more difficult than basic auth to configure. It just requires adding a single OAuth Application record to the registry on each instance.  Please view the [tutorial on community](https://sn.works/sdk/cicd) or [here](TUTORIAL.md) to set that up before continuing.
 
-If you're new here and just want it running with the least setup, use **basic auth for both test and prod** — it needs an existing instance user's username/password, not an OAuth app registration. OAuth is worth the extra setup once you move past quick iteration (see "Configuring auth" below for why).
-
-Run `./scripts/setup-cicd.sh` or `scripts\setup-cicd.bat` to configure all three interactively — tell it the instance URLs and auth type for each instance, and it prompts for the right credentials and pushes everything with `gh`.
+1. Fork this repo and clone it locally.
+2. Make sure that the [Github CLI](https://github.com/cli/cli#installation) (GH) is installed.
+3. Run `./scripts/setup-cicd.sh` or `scripts\setup-cicd.bat` to configure interactively (basic auth requires an admin user on each instance--use the [Tutorial](https://sn.works/sdk/cicd) to configure the preferred OAuth).  
+4. Create a new branch then increment the version number in `package.json` and commit and push to your repo.
+5. Open the repo in your browser and create a Pull Request (PR) for that commit.
+6. Monitor the workflows: you can see it inline in the PR or in the Actions tab.
 
 ## How this repo's pipeline works
 
@@ -31,21 +32,11 @@ The pipeline is split across three files, all built entirely on the ServiceNow S
   4. **`approve-prod`** — a manual approval gate (a GitHub Environment) before anything touches production.
   5. **`install-prod`** — installs that exact published version onto the production instance (`now-sdk cicd install`).
 
-Both Basic and OAuth client-credentials auth are supported, for both the test and prod instance independently — it's one parameterized codebase, not a fork. See "Configuring auth" below.
+Both Basic and OAuth client-credentials auth are supported independently. I.e. you could use basic for your test instance and oauth for prod.
 
-## Configuring auth
+## Variables and Secrets
 
-`./scripts/setup-cicd.sh` or `scripts/setup-cicd.bat` will configure your variables and secrets interactively. 
-
-You may log in to your Github repo and navigate to **Setup > Secrets and Variables > Actions** and use the Secrets and Variables tabs to set these values directly, or use the `gh` command line tool as shown following.
-
-Each instance (test, prod) picks Basic or OAuth independently via a repo Variable:
-
-Bash or Windows:
-```bash
-gh variable set SN_SDK_TEST_AUTH_TYPE --repo <owner>/<repo> --body "oauth"
-gh variable set SN_SDK_PROD_AUTH_TYPE --repo <owner>/<repo> --body "basic"
-```
+View at **Setup > Secrets and Variables > Actions** in your repo.
 
 **Variables**
 
@@ -63,17 +54,15 @@ gh variable set SN_SDK_PROD_AUTH_TYPE --repo <owner>/<repo> --body "basic"
 
 See [`.github/workflows/README.md`](.github/workflows/README.md) for the full switch mechanics and the exact `gh` commands to set them.
 
-Setting up OAuth also requires a one-time setup on the ServiceNow instance itself (a service user, a system property, and an OAuth Application Registry) — see https://servicenow.github.io/sdk/config/ci-integration#authentication-for-now-sdk-install, or run `now-sdk explain ci-integration`.
-
-For the full walkthrough covering both the instance-side and GitHub-side setup end to end, see [TUTORIAL.md](TUTORIAL.md), watch the [tutorial video](https://youtu.be/rcdtlJah-F4), or follow the [tutorial on community](https://sn.works/sdk/cicd).
+For the full walkthrough covering both the instance-side OAuth and GitHub-side setup end to end, see [TUTORIAL.md](TUTORIAL.md), watch the [tutorial video](https://youtu.be/rcdtlJah-F4), or follow the [tutorial on community](https://sn.works/sdk/cicd).
 
 ### Versioning matters here
 
-Application Repository versions are immutable — publishing a version that's already been published fails. The `version` field in `package.json` is what gets published, so **it has to increase on every push that's meant to ship**. A local git hook enforces this automatically before you can push (see the appendix on Husky).
+If you are going to use the second prod deployment flow it relies on the Application Repository in which versions count. Be sure to increment the `version` field in `package.json` when you are ready to push and create a PR. A local git hook enforces this automatically before you can push (see the appendix on Husky).
 
 ### Note on testing with a Personal Developer Instance (PDI)
 
-You may test this in a PDI for everything except the `publish` feature, as that requires App Repo.  As such you will be able to build, deploy and ATF test this sample with any two instances (the PR workflow), but if you wish to publish to App Repo and deploy you will need an environment with access to App Repo.
+You may test this in a PDI for everything except the `publish` feature in the prod deployment flow, as that requires App Repo.  As such you will be able to build, deploy and ATF test this sample with any two instances (the PR workflow), but if you wish to publish to App Repo and deploy you will need an environment with access to App Repo.
 
 ### Making a change
 
@@ -85,13 +74,7 @@ You may test this in a PDI for everything except the `publish` feature, as that 
 
 ## Reproducing this pattern in a new project
 
-If you're setting up something similar from scratch, an AI coding assistant with the ServiceNow SDK skill can generate a working GitHub Actions workflow directly from a description. A couple of starting prompts:
-
-> "Set up a GitHub Actions workflow for my ServiceNow SDK (Fluent) project that, on every push to main, builds the app, installs it to a test instance using basic auth, then runs my ATF regression suite before publishing the version from package.json to the Application Repository."
-
-> "Add a production stage to my ServiceNow SDK GitHub Actions pipeline: a manual approval gate, then an install of the already-published Application Repository version to my production instance using OAuth client credentials instead of basic auth."
-
-Treat the generated YAML as a starting point — instance URLs, credential secrets, and instance names will need to match your own environment. For a denser, copy-pasteable reference to hand an AI assistant (env vars, instance-config checklist, `gh` snippets), see [SETUP.md](SETUP.md).
+You may use the flows in `.github` folder as inspiration, and make sure that your dependencies in `package.json` are similar in your project.  Treat the generated YAML as a starting point — instance URLs, credential secrets, and instance names will need to match your own environment. You may hand [SETUP.md](SETUP.md) to an AI assistant to help you configure your own pipeline.
 
 ## References
 
@@ -102,8 +85,6 @@ Treat the generated YAML as a starting point — instance URLs, credential secre
 - [Installing the GitHub CLI (`gh`)](https://github.com/cli/cli#installation) — required by `scripts/setup-cicd.sh`/`.bat` and the manual `gh` commands throughout this doc.
 
 ## Appendix: other repo tooling
-
-This repo also uses a couple of small, unrelated conveniences that aren't part of the CI/CD story above:
 
 - **[Husky](https://www.npmjs.com/package/husky)** manages a local `pre-push` git hook (`scripts/verify-push.js`) that blocks pushing directly to `main` and blocks pushing a `package.json` version that hasn't advanced past `origin/main`'s. It only runs on a developer's machine — it's skipped entirely in CI.
 - **[`docs/version-bump-automation.md`](docs/version-bump-automation.md)** sketches an idea for having CI bump `package.json`'s version automatically after the PR. 
