@@ -1,6 +1,8 @@
 # Tutorial: CI/CD for a ServiceNow SDK app with GitHub Actions
 
-Follow the [tutorial on community](https://sn.works/sdk/cicd).
+Follow the [tutorial and video on community](https://sn.works/sdk/cicd).
+
+> **⚠️ Caution:** Setting up this pipeline means creating automations with CI/CD credentials, service users and OAuth applications. These can write directly to your ServiceNow instances without a human in the loop so it is your responsibility to configure and use these carefully, keep secrets out of version control, and understand exactly what each workflow will do to your instance before you run it.  Always start by testing in sub-prod instances.
 
 Set up this repo's CI/CD pipeline against your own ServiceNow instances, using either Basic or OAuth client credentials, for both the test and production instance.
 

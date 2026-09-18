@@ -1,6 +1,10 @@
 # Dev Passport Brazil
 
+Find a [tutorial and video on community](https://sn.works/sdk/cicd).
+
 A ServiceNow application built with the [ServiceNow SDK](https://www.npmjs.com/package/@servicenow/sdk) ("Fluent").
+
+> **⚠️ Caution:** Setting up this pipeline means creating automations with CI/CD credentials, service users and OAuth applications. These can write directly to your ServiceNow instances without a human in the loop so it is your responsibility to configure and use these carefully, keep secrets out of version control, and understand exactly what each workflow will do to your instance before you run it.  Always start by testing in sub-prod instances.
 
 ## Using this against your own instances
 
@@ -29,14 +33,15 @@ The pipeline is split across three files, all built entirely on the ServiceNow S
 
 Both Basic and OAuth client-credentials auth are supported, for both the test and prod instance independently — it's one parameterized codebase, not a fork. See "Configuring auth" below.
 
-> **Note:** This repo doesn't have GitHub branch protection enabled (it's gated behind a paid tier here), so the PR check is informational only — a red check does **not** block the merge button. The convention is to wait for green before merging.
-
 ## Configuring auth
 
-`./scripts/setup-cicd.sh` does the following for you interactively. Manual equivalent:
+`./scripts/setup-cicd.sh` or `scripts/setup-cicd.bat` will configure your variables and secrets interactively. 
+
+You may log in to your Github repo and navigate to **Setup > Secrets and Variables > Actions** and use the Secrets and Variables tabs to set these values directly, or use the `gh` command line tool as shown following.
 
 Each instance (test, prod) picks Basic or OAuth independently via a repo Variable:
 
+Bash or Windows:
 ```bash
 gh variable set SN_SDK_TEST_AUTH_TYPE --repo <owner>/<repo> --body "oauth"
 gh variable set SN_SDK_PROD_AUTH_TYPE --repo <owner>/<repo> --body "basic"
@@ -46,7 +51,7 @@ gh variable set SN_SDK_PROD_AUTH_TYPE --repo <owner>/<repo> --body "basic"
 
 | Auth type | Variable(s) |
 |---|---|
-| — | `SN_SDK_TEST_INSTANCE_URL`, `SN_SDK_PROD_INSTANCE_URL`, `SN_SDK_TEST_AUTH_TYPE`, `SN_SDK_PROD_AUTH_TYPE` |
+| `basic & oauth` | `SN_SDK_TEST_INSTANCE_URL`, `SN_SDK_PROD_INSTANCE_URL`, `SN_SDK_TEST_AUTH_TYPE`, `SN_SDK_PROD_AUTH_TYPE` |
 | `basic` | `SN_SDK_TEST_USER`, `SN_SDK_PROD_USER` |
 
 **Secrets**
@@ -94,10 +99,11 @@ Treat the generated YAML as a starting point — instance URLs, credential secre
 - [GitHub Actions workflow syntax](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions) — the reference for editing `.github/workflows/*.yml` files.
 - [ServiceNow SDK documentation](https://servicenow.github.io/sdk/) — Fluent language reference, CLI commands, and the CI/CD integration guide.
 - [`@servicenow/sdk` on npm](https://www.npmjs.com/package/@servicenow/sdk)
+- [Installing the GitHub CLI (`gh`)](https://github.com/cli/cli#installation) — required by `scripts/setup-cicd.sh`/`.bat` and the manual `gh` commands throughout this doc.
 
 ## Appendix: other repo tooling
 
 This repo also uses a couple of small, unrelated conveniences that aren't part of the CI/CD story above:
 
 - **[Husky](https://www.npmjs.com/package/husky)** manages a local `pre-push` git hook (`scripts/verify-push.js`) that blocks pushing directly to `main` and blocks pushing a `package.json` version that hasn't advanced past `origin/main`'s. It only runs on a developer's machine — it's skipped entirely in CI.
-- **[`docs/version-bump-automation.md`](docs/version-bump-automation.md)** sketches an idea for having CI bump `package.json`'s version automatically during the PR. Not implemented yet.
+- **[`docs/version-bump-automation.md`](docs/version-bump-automation.md)** sketches an idea for having CI bump `package.json`'s version automatically after the PR. 
