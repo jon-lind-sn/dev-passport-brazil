@@ -1,6 +1,6 @@
 {
     "name": "dev-passport-brazil",
-    "version": "0.0.20",
+    "version": "0.0.21",
     "description": "",
     "license": "UNLICENSED",
     "imports": {
@@ -16,7 +16,7 @@
         "test" : "npx @servicenow/sdk cicd testsuite run --test-suite-name \"Dev Passport Brazil Regression Suite\""
     },
     "devDependencies": {
-        "@servicenow/sdk": "4.12.0",
+        "@servicenow/sdk": "^4.13.3",
         "@servicenow/glide": "27.0.5",
         "husky": "^9.1.7"
     }
