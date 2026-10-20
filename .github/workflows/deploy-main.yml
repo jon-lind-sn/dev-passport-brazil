@@ -47,9 +47,19 @@ jobs:
 
       - name: Publish to Application Repository
         run: |
-          npx @servicenow/sdk cicd publish \
+          set +e
+          RESULT=$(npx @servicenow/sdk cicd publish \
             ${{ steps.auth.outputs.cicd-auth-flag }} \
-            -o json
+            -o json)
+          EXIT_CODE=$?
+          echo "$RESULT"
+
+          if [ $EXIT_CODE -ne 0 ]; then
+            VERSION=$(jq -r .version package.json)
+            MESSAGE=$(echo "$RESULT" | jq -r '.error.message // empty' 2>/dev/null)
+            echo "::error title=Publish failed::${MESSAGE:-unknown error}. The auth step already logged in successfully, so this is usually not a credentials problem. Application Repository versions are immutable: check whether version ${VERSION} (package.json) was already published and bump it."
+          fi
+          exit $EXIT_CODE
 
   approve-prod:
     needs: publish
