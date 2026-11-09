@@ -2,7 +2,7 @@
 
 Dense, copy-pasteable reference for configuring this pipeline's authentication. Written for an AI coding assistant loading it into context to help a user replicate this setup, or for a human who just wants the exact values. For narrative explanation, see [TUTORIAL.md](TUTORIAL.md); for the switch mechanics, see [.github/workflows/README.md](.github/workflows/README.md).
 
-For the GitHub-side half of this (instance URLs, auth-type variables, and secrets), `./scripts/setup-cicd.sh` or `scripts\setup-cicd.bat` automates everything below — run it interactively, or non-interactively with `--test basic|oauth --prod basic|oauth --repo <owner>/<repo>` (it still prompts for instance URLs and credentials). Re-running it leaves any secret unchanged if you leave that prompt blank.
+For the GitHub-side half of this (instance URLs, auth-type variables, and secrets), `npm run setup-cicd` automates everything below. Run it interactively, or pass flags after `--`: `npm run setup-cicd -- --test basic|oauth --prod basic|oauth --repo <owner>/<repo>` (it still prompts for instance URLs and credentials). Leave the prod instance blank for a one-instance setup. Re-running it leaves any secret unchanged if you leave that prompt blank.
 
 ## `now-sdk install` environment variables
 

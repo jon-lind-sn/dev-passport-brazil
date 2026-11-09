@@ -160,7 +160,7 @@ gh secret set SN_SDK_PROD_OAUTH_CLIENT_SECRET --repo <owner>/<repo> --body '<cli
 
 Swap in the `TEST` names for the test instance.
 
-**Alternative:** run `./scripts/setup-cicd.sh` or `scripts\setup-cicd.bat` from the repo root instead of the steps above. It prompts for each instance's URL, auth type, and matching credentials, and pushes them with `gh`. Re-running it later leaves any secret you leave blank untouched.
+**Alternative:** run `npm run setup-cicd` from the repo root instead of the steps above. It prompts for each instance's URL, auth type, and matching credentials, and pushes them with `gh`. Re-running it later leaves any secret you leave blank untouched.
 
 ## Step 3: Making a change and watching the pipeline run
 
