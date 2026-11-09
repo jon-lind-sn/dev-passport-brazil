@@ -1,6 +1,6 @@
 {
     "name": "dev-passport-brazil",
-    "version": "0.0.25",
+    "version": "0.0.26",
     "description": "",
     "license": "UNLICENSED",
     "imports": {
@@ -12,12 +12,12 @@
         "build-deploy": "npx @servicenow/sdk build && npx @servicenow/sdk install",
         "transform": "npx @servicenow/sdk transform",
         "types": "npx @servicenow/sdk dependencies",
-        "prepare": "node scripts/prepare.js",
-        "test" : "npx @servicenow/sdk cicd testsuite run --test-suite-name \"Dev Passport Brazil Regression Suite\""
+        "set-scope": "node scripts/set-scope.js",
+        "setup-cicd": "node scripts/setup-cicd.js",
+        "test": "npx @servicenow/sdk cicd testsuite run --test-suite-name \"Dev Passport Brazil Regression Suite\""
     },
     "devDependencies": {
-        "@servicenow/sdk": "^4.13.3",
         "@servicenow/glide": "27.0.5",
-        "husky": "^9.1.7"
+        "@servicenow/sdk": "^4.13.3"
     }
 }
